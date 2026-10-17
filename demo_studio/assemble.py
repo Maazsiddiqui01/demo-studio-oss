@@ -185,6 +185,9 @@ def assemble(sb, timeline: dict, narr: dict, out: Path, keep_frames: bool = Fals
             from .style import fits_1to1
             fw, fh = fits_1to1(sb.style, sb.viewport)
             log(f"  tip: the recording is scaled to {frame['scale']:.0%}; viewport [{fw}, {fh}] would fit 1:1 (sharpest text)")
+        elif frame["scale"] > 1.01:
+            log(f"  the recording is scaled up {frame['scale']:.2f}x to fill the frame; a bigger window or "
+                "viewport gives sharper text")
     else:
         w, h = sb.viewport
         vf = f"[0:v]fps={FPS},scale={w}:{h}:flags=lanczos[base]"

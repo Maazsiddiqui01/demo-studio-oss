@@ -13,10 +13,20 @@ from demo_studio.storyboard import Style, StoryboardError, load
 from test_validate import BASE, build
 
 
-def test_layout_places_the_recording_1to1_when_it_fits():
-    lay = style.layout(Style(frame=True), (1440, 900))
+def test_layout_places_the_recording_1to1_with_fill_false():
+    lay = style.layout(Style(frame=True, fill=False), (1440, 900))
     assert (lay["w"], lay["h"], lay["scale"]) == (1440, 900, 1.0)
     assert (lay["x"], lay["y"]) == (240, 90)  # centred on 1920x1080
+
+
+def test_layout_fills_the_frame_by_default():
+    # a small recording (a 1366x720 desktop window) is scaled up until it reaches the padding line
+    st = Style(frame=True)
+    lay = style.layout(st, (1366, 720))
+    pad = st.padding * 1080
+    assert lay["scale"] > 1.2
+    assert lay["w"] >= 1920 - 2 * pad - 2 or lay["h"] >= 1080 - 2 * pad - 2
+    assert style.layout(Style(frame=True), (300, 200))["scale"] == style.MAX_FILL  # capped
 
 
 def test_layout_scales_down_for_a_square_canvas_and_leaves_room_for_the_bar():

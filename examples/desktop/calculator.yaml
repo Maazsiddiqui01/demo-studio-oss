@@ -7,7 +7,7 @@ version: 1
 name: desktop-calculator
 mode: public
 driver: desktop
-app: { window: "^Calculator$", launch: "calc.exe", size: [560, 690], position: [40, 20] }
+app: { window: "^Calculator$", launch: "calc.exe", size: [1100, 690], position: [40, 20] }
 title: "A *desktop app* in thirty seconds"
 eyebrow: "DEMO STUDIO EXAMPLE"
 intro_note: "Windows Calculator, recorded by the desktop driver."

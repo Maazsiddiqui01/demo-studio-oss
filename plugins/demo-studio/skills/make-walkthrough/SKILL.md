@@ -71,7 +71,7 @@ base_url: "http://localhost:5173"
 serve: demo-app                  # optional: serve a local folder at base_url while recording
 navigation: spa                  # spa (client-side routes) or load (full page loads)
 voice: auto                      # female | male | auto (varies by video) | an id such as af_heart, am_michael
-viewport: auto                   # fills the framed canvas at 1:1 (sharp text, little padding)
+viewport: auto                   # fills the framed canvas at 1:1 (sharp text, thin margin)
 sources: ["README.md#features"]
 banned_terms: []
 allowed_hosts: []
@@ -109,7 +109,8 @@ steps:
 
 About 150 to 200 words of narration make 60 to 90 seconds. Voices: `female` picks from af_heart,
 af_bella and bf_emma, `male` from am_michael, am_fenrir, bm_george and am_puck; a step can set its
-own `voice` for a second narrator. Pick the look on purpose: a background
+own `voice` for a second narrator. Keep the screen big: the window should fill the frame with only a thin wallpaper margin
+(`padding` 0.04 or less; never shrink the recording to make room for wallpaper). Pick the look on purpose: a background
 that suits the app's colours (`studio backgrounds` shows all 21) or `auto`, `theme: kinetic` for
 light apps and brands, the `product` intro when the first screen is the best picture.
 `studio slides walkthroughs/my-app.yaml` renders every intro, outro and caption design over the app.
@@ -143,6 +144,8 @@ steps:
 - Reset the app before each render (filters and sliders keep their state) and never save their
   file. A `key` step that saves, deletes or submits counts as a write on a live system.
 - `studio render <file> --reassemble` encodes again from the kept recording without recording.
+- Maximize the window or give it a wide `app.size`: the recording is scaled up to fill the frame,
+  and a tall, narrow window leaves wide margins.
 
 ## 5. Render, review, hand over
 

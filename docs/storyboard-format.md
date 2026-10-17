@@ -55,7 +55,7 @@ style:                              # the framed look. On by default in public m
   radius: 18
   corners: squircle                 # squircle | round
   border: false                     # a thin light border around the window
-  fill: false                       # scale a smaller recording up to fill the space
+  fill: auto                        # a smaller recording is scaled up to fill the frame (false: keep 1:1)
   motion: drift                     # drift (the wallpaper pans slowly) | none
   shadow: true
   chrome: true                      # a window bar with three dots
@@ -372,7 +372,7 @@ inside `style` are errors.
 | `radius` | integer | `18` | Corner radius of the window, in pixels. |
 | `corners` | string | `squircle` | `squircle` (smooth, continuous corners) or `round` (a plain rounded rectangle). |
 | `border` | boolean | `false` | A thin light border around the window, in place of the faint dark outline. |
-| `fill` | boolean | `false` | Scale a recording that is smaller than the free space up to fill it. Text gets slightly softer. |
+| `fill` | `auto`, `true` or `false` | `auto` | `auto` scales a recording that is smaller than the free space up to fill it (up to 2x), so the wallpaper stays a thin margin. `true` has no limit. `false` keeps it at 1:1 with more wallpaper around it. |
 | `motion` | string | `drift` | `drift` pans the wallpaper slowly behind the still window. `none` keeps it still. |
 | `shadow` | boolean | `true` | Soft shadow under the window. When false, only a thin outline. |
 | `chrome` | boolean | `false` | Adds a window bar with three dots above the recording. |
@@ -390,11 +390,10 @@ With no `style` block at all, public mode is framed and handover mode is not. Wh
 the video is the size of the viewport, and `canvas`, `background`, `padding`, `radius`, `corners`,
 `border`, `fill`, `motion`, `shadow` and `chrome` do nothing.
 
-**Placement.** The recording is placed on the canvas at 1:1 when it fits inside the canvas minus
-the padding, the window bar (if on) and the subtitle band (if on). It is scaled down when it does
-not fit, and scaled up only with `fill: true`. The default 1440 by 900 viewport on the default
-1920 by 1080 canvas fits at full size, even with `chrome` on. A larger viewport is scaled down and
-its text goes softer. Subtitles take a band below the window (118 px on a 1080 px canvas, scaled
+**Placement.** The window always fills the space inside the padding, the window bar (if on) and
+the subtitle band (if on), so the wallpaper is only a thin margin. Keep `padding` small: it is
+there for looks, and the screen should take up the frame. A recording smaller than that space is
+scaled up to fill it (`fill: auto`, up to 2x, text a little softer); a larger one is scaled down. Subtitles take a band below the window (118 px on a 1080 px canvas, scaled
 with the shorter side), which can push a full-size viewport below 1:1. Whenever the recording is
 scaled down, `studio render` prints a tip with a viewport that would fit 1:1. `viewport: auto`
 picks that size for you.

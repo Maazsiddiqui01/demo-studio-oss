@@ -8,9 +8,10 @@ ffmpeg merges the mask into the recording as alpha, slowly pans the wallpaper (s
 drift), lays the window layer on it and the recording on top. Only crop, overlay and
 alphamerge are used, so ffmpeg 4.4 works too.
 
-The recording is placed at 1:1 when it fits, so text stays pixel-exact; `viewport: auto` in a
-storyboard sizes the browser to fill the canvas. It is scaled down when the canvas is smaller,
-and up only with style.fill.
+The recording fills the frame: the window always reaches the padding line, so the wallpaper is a
+thin margin. `viewport: auto` sizes a browser to fill the canvas at exactly 1:1 (sharpest text). A
+smaller recording, such as a desktop app window, is scaled up to fill (style.fill: auto, up to
+2x); style.fill: false keeps it at 1:1 with more wallpaper around it.
 """
 from __future__ import annotations
 
@@ -103,6 +104,9 @@ def auto_viewport(style) -> tuple[int, int]:
     return int(cw - 2 * pad) // 2 * 2, int(ch - 2 * pad - bar - band) // 2 * 2
 
 
+MAX_FILL = 2.0  # fill: auto scales a small recording up this far at most
+
+
 def layout(style, viewport: tuple[int, int]) -> dict:
     """Where the window and the recording go on the canvas."""
     cw, ch = style.canvas
@@ -110,8 +114,13 @@ def layout(style, viewport: tuple[int, int]) -> dict:
     k, bar, band = _chrome_band(style)
     pad = style.padding * min(cw, ch)
     s = min((cw - 2 * pad) / vw, (ch - 2 * pad - bar - band) / vh)
-    if not getattr(style, "fill", False):
+    fill = getattr(style, "fill", "auto")
+    if fill is False:
         s = min(1.0, s)
+    elif fill == "auto":
+        s = min(MAX_FILL, s)
+    if abs(s - 1.0) < 0.01:  # viewport: auto rounds to even pixels; keep it exactly 1:1
+        s = 1.0
     w, h = max(2, int(vw * s) // 2 * 2), max(2, int(vh * s) // 2 * 2)  # round down: stay inside the padding
     x = _even((cw - w) / 2)
     wy = _even((ch - band - h - bar) / 2)

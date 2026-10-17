@@ -99,8 +99,9 @@ pywinauto's syntax: `^` is Ctrl, `%` is Alt, `+` is Shift, and named keys go in 
 
 ## Tips
 
-- The window is brought to the front and recorded at its own size. A window that fits the canvas
-  1:1 gives the sharpest text; the render prints a tip when the recording is scaled.
+- The window is brought to the front and recorded at its own size, then scaled up to fill the
+  frame. Maximize it (`app.maximize: true`) or give it a wide `app.size` close to the canvas shape:
+  a tall, narrow window leaves wide margins and looks small.
 - Put the app back where it started before you render again. Filters, sliders and selections keep
   their state between runs.
 - `studio render <file> --reassemble` encodes again from the recording on disk (kept after a failed

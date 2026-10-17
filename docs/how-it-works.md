@@ -84,12 +84,12 @@ proportion to their length across the span of the line.
 ## Why frames are captured at the viewport size
 
 Chromium's screencast is capped at the viewport's size in CSS pixels. Asking for a larger frame
-does not add detail. So the viewport is the true resolution of the recording. The framed look places
-that recording on the canvas at 1:1, so text stays sharp, and scales it down only when it does not
-fit (up only with `style.fill`, at the cost of softer text). Pick a viewport that fits the canvas
-minus its padding, or write `viewport: auto` and let the storyboard do the sum. The default 1440 by
-900 on a 1920 by 1080 canvas fits. When the assembler has to scale, it logs a tip with a viewport
-that would fit 1:1.
+does not add detail. So the viewport is the true resolution of the recording. The framed look
+always fills the frame: the window reaches the padding line, so the wallpaper stays a thin margin.
+`viewport: auto` sizes the browser so that this happens at exactly 1:1, the sharpest result. A
+recording that is smaller than the space (a desktop window, a small fixed viewport) is scaled up
+to fill it, up to 2x (`style.fill: auto`); `fill: false` keeps it at 1:1 with more wallpaper. A
+larger one is scaled down, and the assembler logs a tip with a viewport that would fit 1:1.
 
 ## The framed look
 
@@ -153,8 +153,8 @@ if the element would not fit.
   while zoomed is not compensated. If a step looks wrong, scroll first and zoom after, or leave zoom
   off for that page.
 - **The recording is capped at the viewport size.** Screencast frames never exceed the viewport in
-  CSS pixels, so a bigger canvas does not add detail. Place the recording at 1:1, or use
-  `viewport: auto`, for sharp text. Scaling down softens it, and so does `fill`.
+  CSS pixels, so a bigger canvas does not add detail. Use `viewport: auto` for sharp text at 1:1.
+  Scaling a smaller recording up to fill the frame, or a larger one down, softens text a little.
 - **ffmpeg can hang.** ffmpeg 7 and 8 sometimes deadlock at the end of a long filter graph when
   the machine is busy. Every ffmpeg run is watched: one that makes no progress for 3 minutes is
   stopped and tried once more with single-threaded filtering.

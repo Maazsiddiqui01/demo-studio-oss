@@ -81,7 +81,8 @@ class Style:
     radius: int = 18
     corners: str = "squircle"   # squircle | round
     border: bool = False        # a thin light border around the window
-    fill: bool = False          # scale the recording up to fill (text gets slightly softer)
+    fill: Any = "auto"          # auto: a smaller recording is scaled up to fill the frame (up to 2x);
+                                # true: no limit; false: never above 1:1 (pixel-exact, more wallpaper)
     motion: str = "drift"       # drift (the wallpaper pans slowly) | none
     shadow: bool = True
     chrome: bool = False
@@ -278,9 +279,11 @@ def _style(d: Any, mode: str, errors: list[str]) -> Style:
     for key in ("radius",):
         if key in d:
             setattr(st, key, int(d[key]))
-    for key in ("shadow", "chrome", "subtitles", "border", "fill"):
+    for key in ("shadow", "chrome", "subtitles", "border"):
         if key in d:
             setattr(st, key, bool(d[key]))
+    if "fill" in d:
+        st.fill = "auto" if str(d["fill"]).lower() == "auto" else bool(d["fill"])
     st.zoom = _zoom(d.get("zoom"), "style.", errors)
     if st.music in ("none", "off", ""):
         st.music = None
