@@ -19,7 +19,7 @@ base_url: "http://localhost:5199"
 serve: demo-app                     # serves this folder at base_url while recording; remove it for your own app
 navigation: load                    # load, or spa for apps with client-side routes
 auth: null                          # a saved session from `studio login <name>` for apps behind a sign-in
-voice: "af_heart"                   # any Kokoro voice, for example af_bella, am_michael, bf_emma
+voice: auto                         # female | male | auto (varies by video) | a voice id such as af_heart or am_michael
 viewport: [1440, 900]
 sources:                            # where every claim in the narration comes from
   - "demo-app/index.html (made-up demo data)"

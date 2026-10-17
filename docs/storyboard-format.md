@@ -157,7 +157,7 @@ Unknown top-level keys are ignored, not reported. A typo in a key name does noth
 | `base_url` | string | required | Where the app runs. A trailing slash is removed. A value starting with `TODO` counts as missing. |
 | `serve` | path | none | A folder with an `index.html`, served at `base_url` while recording. Details below. |
 | `navigation` | string | `load` | `load` or `spa`. Details below. |
-| `voice` | string | `af_heart` | A Kokoro voice id, for example `af_bella`, `am_michael` or `bf_emma`. On the default CPU backend, ids starting with `b` use British English and all others American English. |
+| `voice` | string or list | `af_heart` | `female`, `male`, `auto` (either), a list of voice ids, or one id such as `af_heart`, `am_michael`, `bf_emma` or `bm_george`. `female`, `male`, `auto` and lists pick one voice from the video's name, so videos differ and a re-render keeps its voice. See "Voices" below. |
 | `speed` | number | `1.0` | Speaking speed of the voice. It does not change the video speed. |
 | `viewport` | `[width, height]` or `auto` | `[1440, 900]` | Browser size in CSS pixels. Frames are captured at this size. `auto` fills the canvas at 1:1. Details below. |
 | `poster` | string | `intro` | Which moment becomes `poster.jpg`. Details below. |
@@ -260,6 +260,7 @@ the pace of the video.
 | `scroll_by` | integer | `0` | For `scroll` without a `target`: pixels to scroll. 0 means 500. |
 | `zoom` | see Zoom | off | Zoom for this step. |
 | `zoom_on` | selector | none | Element to zoom to. Defaults to `target`, then `highlight`. |
+| `voice` | string | the video's voice | This step's narrator: an id, `female` or `male`. Use it for two narrators in one video. |
 | `live_write` | boolean | `false` | Declares that the step creates, edits, sends or deletes data. |
 | `confirmed_by_owner` | boolean | `false` | The owner of the system agreed to that write. Required with `live_write`. |
 
@@ -287,6 +288,23 @@ selector). While it waits, a "Sped up 4x" badge shows in the corner, the caption
 "(sped up)", and that stretch of video plays `speed_factor` times faster. The narration still
 plays at normal speed, so write enough words to cover the sped-up stretch: the gate reports any
 silence over 3 s.
+
+## Voices
+
+The narration uses Kokoro-82M on your machine. `female`, `male` and `auto` pick from the clearest
+voices of each kind:
+
+| Pool | Voices |
+|---|---|
+| `female` | `af_heart`, `af_bella`, `bf_emma` |
+| `male` | `am_michael`, `am_fenrir`, `bm_george`, `am_puck` |
+
+Any English Kokoro voice id also works: `af_alloy`, `af_aoede`, `af_bella`, `af_heart`,
+`af_jessica`, `af_kore`, `af_nicole`, `af_nova`, `af_river`, `af_sarah`, `af_sky`, `am_adam`,
+`am_echo`, `am_eric`, `am_fenrir`, `am_liam`, `am_michael`, `am_onyx`, `am_puck`, `am_santa`,
+`bf_alice`, `bf_emma`, `bf_isabella`, `bf_lily`, `bm_daniel`, `bm_fable`, `bm_george`, `bm_lewis`.
+The first letter is the accent (`a` American, `b` British), the second the voice (`f` female,
+`m` male). A step can set its own `voice` for a second narrator.
 
 ## Slides
 

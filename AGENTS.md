@@ -22,10 +22,11 @@ do that work. Ask them only for what you cannot find out yourself, in one short 
    On Linux, if Chromium cannot start because system libraries are missing, ask the person to
    install Playwright's system dependencies (they need sudo):
    https://playwright.dev/python/docs/browsers#install-system-dependencies
-5. Claude Code only, optional: add the plugin so the `make-walkthrough` skill loads in later
-   sessions: `claude plugin marketplace add Maazsiddiqui01/demo-studio-oss`, then
-   `claude plugin install demo-studio@demo-studio-oss`. If you cannot run these, give the person
-   the two `/plugin` commands from the README to type.
+5. Claude Code only, optional: add the plugins so the `make-walkthrough` and `humanizer` skills
+   load in later sessions: `claude plugin marketplace add Maazsiddiqui01/demo-studio-oss`,
+   `claude plugin install demo-studio@demo-studio-oss`, `claude plugin marketplace add blader/humanizer`
+   and `claude plugin install humanizer@humanizer`. If you cannot run these, give the person the
+   `/plugin` commands from the README to type.
 6. Tell the person it is ready, what you installed, and that they can now describe a video.
 
 Nothing in the setup needs an API key, an account or a paid service.
@@ -42,6 +43,7 @@ Ask only for what is missing:
   (`mode: handover`). If the app shows real customer data and the video is public, stop and ask
   for demo or seeded data, or build a small replica with made-up data.
 - **Sign-in:** if the app needs one, the person runs `studio login <name>` and signs in themselves.
+- **Voice:** a female or male narrator, or a specific voice; otherwise pick one.
 - **Format:** 16:9 by default. A square variant and burned-in subtitles suit social feeds, which
   autoplay muted. Most walkthroughs run 60 to 90 seconds.
 
@@ -58,18 +60,34 @@ Ask only for what is missing:
    waits (`speed_up: true`), zoom on small controls (`zoom: auto`), and list in `sources:` where
    every claim comes from (the README, the docs, the app itself). Never invent numbers, customers
    or quotes.
-3. **Pick the look.** `style.background: auto`, or a preset that suits the app's colours
+3. **Humanize the script. Always.** Before every render, put the narration, captions, title and
+   closing text through the humanizer, so the video does not sound machine-written:
+   - Claude Code: install it once with `claude plugin marketplace add blader/humanizer` and
+     `claude plugin install humanizer@humanizer`, then run `/humanizer` on the script.
+   - Any other agent: read https://raw.githubusercontent.com/blader/humanizer/main/SKILL.md and
+     apply it to the script yourself.
+   - If neither is possible, at least apply its core rules: say the point directly (no "it's not
+     X, it's Y"), no one-line closers or dramatic fragments, no lists of three by reflex, no em or
+     en dashes, no hype or stock AI words (seamless, powerful, unlock, effortless), active voice,
+     plain words, and a mix of short and longer sentences.
+
+   Keep every fact while you edit; add none. The humanizer is MIT licensed, by blader.
+4. **Pick the voice.** `voice: female` or `voice: male` picks a clear voice of that kind, and
+   `voice: auto` varies it between videos. Use a specific id (for example `af_heart`, `bf_emma`,
+   `am_michael`, `bm_george`) when the person asks for one. A step can set its own `voice` for a
+   second narrator.
+5. **Pick the look.** `style.background: auto`, or a preset that suits the app's colours
    (`studio backgrounds` shows all 21). `theme: kinetic` for light apps and brands, `petrol` for
    dark. `studio slides walkthroughs/<name>.yaml` shows every intro, outro and caption design over
    the app. Use `viewport: auto` for the sharpest framed video.
-4. **Render.** `studio validate walkthroughs/<name>.yaml`, then
+6. **Render.** `studio validate walkthroughs/<name>.yaml`, then
    `studio render walkthroughs/<name>.yaml` (add `--variant square` when the storyboard has one).
-5. **Review every frame yourself.** Open each image in `out/<name>/qa/sheets/` (handover videos:
+7. **Review every frame yourself.** Open each image in `out/<name>/qa/sheets/` (handover videos:
    `out/clients/<client>/<name>/qa/sheets/`). Check that captions and subtitles are readable, rings
    and zoom land on the right elements, nothing secret shows, and a public video has no real names
    or contact details. Fix the storyboard and render again until it is right.
-6. **Record the verdict:** `studio check out/<name> --frames pass --note "what you checked"`.
-7. **Hand over:** give the person the MP4 path, the length and the gate result from
+8. **Record the verdict:** `studio check out/<name> --frames pass --note "what you checked"`.
+9. **Hand over:** give the person the MP4 path, the length and the gate result from
    `out/<name>/REPORT.md`. Offer `studio publish out/<name>` if they want a web page for it.
 
 ### Rules
@@ -79,7 +97,8 @@ Ask only for what is missing:
   `live_write: true` and `confirmed_by_owner: true`, and the owner's yes comes from the person.
 - Passwords, keys, tokens and card numbers are masked in the page before frames are captured. Add
   selectors for settings pages under `redact:`. Masking does not reach inside iframes.
-- Keep the copy plain. The validator rejects em and en dashes and warns on hype words.
+- Humanize the script before every render (step 3). The validator also rejects em and en dashes
+  and warns on hype words.
 - Do not commit `out/` or saved sessions.
 
 ## 3. Reference

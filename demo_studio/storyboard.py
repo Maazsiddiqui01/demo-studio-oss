@@ -65,6 +65,7 @@ class Step:
     zoom: float = 0.0           # 0 = no zoom; otherwise the scale (zoom: auto is 1.5)
     zoom_on: str | None = None  # what to zoom to (default: target, then highlight)
     zoom_set: bool = False      # the step sets zoom itself (an explicit zoom: false beats style.zoom)
+    voice: str | None = None    # this step's narrator, when it differs from the video's voice
 
 
 @dataclass
@@ -174,6 +175,11 @@ class Storyboard:
         else:
             outro = "cta" if self.outro_cta else ("summary", "cinematic")[(h >> 8) % 2]
         return intro, outro
+
+    def voice_for(self, line_id: str) -> str:
+        """The voice that reads one narration line: the step's own voice, or the video's."""
+        step = next((s for s in self.steps if s.id == line_id), None)
+        return (step.voice if step and step.voice else None) or self.voice
 
     def narration_lines(self) -> list[tuple[str, str]]:
         lines = []
@@ -395,6 +401,7 @@ def load(path: str | Path, variant: str | None = None) -> Storyboard:
             zoom=_zoom(rs.get("zoom"), w, errors),
             zoom_on=rs.get("zoom_on"),
             zoom_set="zoom" in rs,
+            voice=rs.get("voice"),
         )
         if step.speed_up and not step.wait_for and step.action != "wait_for":
             errors.append(f"{w}speed_up: needs a wait (action wait_for, or a wait_for selector)")
@@ -427,7 +434,7 @@ def load(path: str | Path, variant: str | None = None) -> Storyboard:
         title=data.get("title") or "",
         eyebrow=data.get("eyebrow") or "",
         base_url=(data.get("base_url") or "").rstrip("/"),
-        voice=data.get("voice") or "af_heart",
+        voice=str(data.get("voice") or "af_heart") if not isinstance(data.get("voice"), list) else "af_heart",
         sources=list(data.get("sources") or []),
         steps=steps,
         client=data.get("client"),
@@ -457,6 +464,16 @@ def load(path: str | Path, variant: str | None = None) -> Storyboard:
         raw=data,
         variant=variant,
     )
+    # voice: an id, female, male, auto or a list, resolved from the name (a variant gets its own pick)
+    from .tts import ENGLISH_VOICES, VOICE_POOLS, pick_voice
+    sb.voice = pick_voice(data.get("voice") or "af_heart", sb.name)
+    for st in steps:
+        if st.voice:
+            st.voice = pick_voice(st.voice, f"{sb.name}/{st.id}")
+    for where, v in [("voice", sb.voice)] + [(f"steps.{st.id}.voice", st.voice) for st in steps if st.voice]:
+        if v not in ENGLISH_VOICES:
+            errors.append(f"{where}: {v!r} is not an English Kokoro voice; use female, male, auto, or one of "
+                          f"{', '.join(VOICE_POOLS['female'] + VOICE_POOLS['male'])} (all: docs/storyboard-format.md)")
     if data.get("viewport") == "auto" and sb.style.frame:
         from .style import auto_viewport
         sb.viewport = auto_viewport(sb.style)

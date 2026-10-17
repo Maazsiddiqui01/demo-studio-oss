@@ -32,6 +32,31 @@ Write the script yourself, render it, check every frame, and give me the video f
 
 ## 3. Examples
 
+**A progress update for a client (instead of recording a Loom)**
+
+```text
+Use demo-studio to make a 60 second update video for my client of what I finished this week in
+the app in this repo. Read the commits since Monday, start the app, and show the three changes
+they will care about, in the order they asked for them. Made-up data. Keep the narration short
+and plain, and give me the file to send.
+```
+
+**A portfolio project demo**
+
+```text
+Use demo-studio to make a 75 second demo of my project at http://localhost:5173 for my portfolio.
+Show the problem it solves in one line, then the two flows that show it working. Made-up data,
+subtitles, a light look that matches the app, and a square version too.
+```
+
+**A quick product demo**
+
+```text
+Use demo-studio to make a 45 second product demo of http://localhost:3000 for our landing page.
+Show the main screen, the one action people sign up for, and the result. No sound needed in the
+first seconds, so add subtitles.
+```
+
 **A launch clip for LinkedIn**
 
 ```text
@@ -80,3 +105,25 @@ Ask in plain words, and the agent edits the script and renders again:
 - "Use a darker look and a blue background."
 - "Slow down the part where the report loads, and say what it is doing."
 - "Make a square version with subtitles for LinkedIn."
+- "Use a male voice." or "Use a British voice."
+
+## 5. Everything you can change
+
+You can ask for any of these by name, or describe the effect you want:
+
+| What | Options |
+|---|---|
+| Length and pace | any length; long waits sped up and labelled; holds on important screens |
+| Voice | a female or male narrator, a different one per video, two narrators in one video, any Kokoro voice (`af_heart`, `bf_emma`, `am_michael`, `bm_george`...); speaking speed |
+| Look | themes `petrol` (dark), `kinetic` (light), `navy`; an accent colour in your brand |
+| Background | 21 wallpapers in six colour groups, a CSS gradient, your own image, or a new one per video |
+| Window | padding, corner style, border, shadow, a title bar |
+| Intro and closing | layouts `statement`, `product`, `agenda`, `cinematic`, `summary`, `cta`; a highlighted phrase; a link or command on the closing slide |
+| Captions | `card`, `pill` or `lower`; burned-in subtitles of the narration |
+| Movement | zoom on any element, a drifting background or a still one |
+| Sound | a quiet music bed, your own music file, or none |
+| Shape | 16:9, square, or any canvas size, from the same script |
+| Privacy | public (demo data, banned names) or private handover (real data, stays on your machine) |
+| Publishing | a local folder, or your own server with an optional private link that expires |
+
+Every key is documented in [storyboard-format.md](storyboard-format.md).

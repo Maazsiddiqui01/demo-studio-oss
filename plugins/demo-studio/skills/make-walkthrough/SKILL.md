@@ -45,8 +45,11 @@ build a small replica with made-up data.
    under `sources:` (the README, the docs, the app itself).
 5. **Public mode:** put client and company names, email domains and people's names in
    `banned_terms`; contact details fail unless the host is in `allowed_hosts`.
-6. **Copy:** plain and instructional, one or two short sentences per step. The validator rejects
-   em and en dashes and warns on hype words.
+6. **Humanize the script before every render.** Run `/humanizer` on the narration, captions,
+   title and closing text (install: `claude plugin marketplace add blader/humanizer`, then
+   `claude plugin install humanizer@humanizer`; without it, read
+   https://raw.githubusercontent.com/blader/humanizer/main/SKILL.md and apply it). Keep every fact,
+   add none. One or two short sentences per step; the validator rejects em and en dashes.
 
 ## 4. Write the storyboard
 
@@ -65,7 +68,7 @@ outro: { heading: "...", bullets: ["..."], narration: "...", layout: auto, cta: 
 base_url: "http://localhost:5173"
 serve: demo-app                  # optional: serve a local folder at base_url while recording
 navigation: spa                  # spa (client-side routes) or load (full page loads)
-voice: af_heart
+voice: auto                      # female | male | auto (varies by video) | an id such as af_heart, am_michael
 viewport: auto                   # fills the framed canvas at 1:1 (sharp text, little padding)
 sources: ["README.md#features"]
 banned_terms: []
@@ -102,7 +105,9 @@ steps:
     narration: "Plan my day sorts the list. The wait is sped up."
 ```
 
-About 150 to 200 words of narration make 60 to 90 seconds. Pick the look on purpose: a background
+About 150 to 200 words of narration make 60 to 90 seconds. Voices: `female` picks from af_heart,
+af_bella and bf_emma, `male` from am_michael, am_fenrir, bm_george and am_puck; a step can set its
+own `voice` for a second narrator. Pick the look on purpose: a background
 that suits the app's colours (`studio backgrounds` shows all 21) or `auto`, `theme: kinetic` for
 light apps and brands, the `product` intro when the first screen is the best picture.
 `studio slides walkthroughs/my-app.yaml` renders every intro, outro and caption design over the app.

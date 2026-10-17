@@ -128,3 +128,23 @@ def test_viewport_auto_fills_the_canvas_at_1to1(tmp_path):
     lay = style.layout(sb.style, sb.viewport)
     assert lay["scale"] == 1.0 and (lay["w"], lay["h"]) == tuple(sb.viewport)
     assert lay["x"] <= 0.05 * 1080 and sb.viewport[0] > 1800
+
+
+def test_voice_picks_male_or_female_and_validates(tmp_path):
+    from demo_studio.tts import VOICE_POOLS
+    assert load(build(tmp_path, voice="male")).voice in VOICE_POOLS["male"]
+    assert load(build(tmp_path, voice="female")).voice in VOICE_POOLS["female"]
+    picks = {load(build(tmp_path, voice="auto", name=f"video-{i}")).voice for i in range(12)}
+    assert picks & set(VOICE_POOLS["male"]) and picks & set(VOICE_POOLS["female"])  # both kinds across videos
+    assert load(build(tmp_path, voice="bm_george")).voice == "bm_george"
+    with pytest.raises(StoryboardError):
+        load(build(tmp_path, voice="xx_nobody"))
+
+
+def test_a_step_can_have_its_own_narrator(tmp_path):
+    steps = [
+        {"id": "a", "action": "pause", "caption": {"n": 1, "title": "A"}, "narration": "One.", "voice": "am_michael"},
+        {"id": "b", "action": "pause", "caption": {"n": 2, "title": "B"}, "narration": "Two."},
+    ]
+    sb = load(build(tmp_path, steps=steps, voice="af_heart"))
+    assert sb.voice_for("a") == "am_michael" and sb.voice_for("b") == "af_heart" and sb.voice_for("_intro") == "af_heart"

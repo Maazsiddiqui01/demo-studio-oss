@@ -1,20 +1,21 @@
-# The demo-studio showcase: a video about demo-studio, made by demo-studio.
+# The demo-studio showcase: a video about demo-studio, made with demo-studio.
 #   studio render examples/showcase/showcase.yaml                    1920x1080
 #   studio render examples/showcase/showcase.yaml --variant square   1080x1080 for social feeds
-# Every artifact on screen is real: assets/ holds one render of the starter project (studio init).
+# What it shows is real: assets/session.js holds the README's two prompts and the steps of a real
+# coding-agent session that followed them; assets/result.webm is a clip of the video it made.
 version: 1
 name: demo-studio-showcase
 mode: public
-title: "Walkthrough videos from *a text file*"
+title: "Walkthrough videos *without recording*"
 eyebrow: "DEMO-STUDIO · FREE AND OPEN SOURCE"
-intro_note: "Made by demo-studio itself. Nobody recorded the screen."
+intro_note: "Made with demo-studio. Nobody recorded the screen."
 intro:
   layout: statement
-  narration: "This video was made by the tool it shows. Nobody recorded the screen."
+  narration: "This video was made with the tool it shows. Nobody recorded the screen."
 outro:
   layout: cta
-  heading: "Make your *first video*"
-  bullets: ["Storyboard in, narrated video out", "MIT licence, runs on your machine"]
+  heading: "Your agent *records it*"
+  bullets: ["Your client's data stays safe", "Free and open source, runs on your computer"]
   cta: "github.com/Maazsiddiqui01/demo-studio-oss"
   narration: "The link is on screen."
 
@@ -25,14 +26,15 @@ auth: null
 voice: "af_heart"
 viewport: auto                     # fills the canvas at 1:1; the app scales its design to fit
 sources:
-  - "README.md and docs/ of github.com/Maazsiddiqui01/demo-studio-oss (what the tool does, the two modes, the gate)"
-  - "examples/showcase/assets/artifacts.js: the storyboard, the real render log and the gate results of one starter render"
-  - "LICENSE (MIT); Kokoro-82M model card (Apache-2.0); Playwright (Apache-2.0); fonts (SIL OFL)"
+  - "README.md, AGENTS.md and docs/prompts.md of github.com/Maazsiddiqui01/demo-studio-oss (the setup prompt, the flow, use cases)"
+  - "examples/showcase/assets/session.js: the prompts and the steps of a real coding-agent session, with real times"
+  - "examples/showcase/assets/result.webm: a clip of the video that session made, and its REPORT.md"
   - "demo_studio/record.py: secrets are masked in the page before frames are captured; studio login: you sign in yourself"
-banned_terms: ["Acme Corp"]              # in your own videos: client names, companies, domains, people
-allowed_hosts: ["github.com"]
+  - "LICENSE (MIT); Kokoro-82M model card (Apache-2.0); Playwright (Apache-2.0); fonts (SIL OFL)"
+banned_terms: ["Acme Corp"]        # in your own videos: client names, companies, domains, people
+allowed_hosts: ["github.com", "githubusercontent.com"]
 style:
-  background: lagoon                 # any preset, a category (blue, dark...), a list, or auto
+  background: lagoon               # any preset, a category (blue, dark...), a list, or auto
   theme: kinetic
   captions: card
   subtitles: true
@@ -43,7 +45,12 @@ variants:
   square:
     name: demo-studio-showcase-square
     viewport: [960, 854]
+    base_url: "http://localhost:5208"   # its own port, so both cuts can render at once
     style: { canvas: [1080, 1080], padding: 0.05, background: ocean }
+  male:                            # the same video with a male narrator
+    name: demo-studio-showcase-male
+    voice: male
+    base_url: "http://localhost:5209"
 
 steps:
   - id: hook
@@ -51,64 +58,64 @@ steps:
     action: wait_for
     target: "[data-demo=hook]"
     highlight: "[data-demo=poster]"
-    caption: { n: 1, title: "From steps to video", sub: "A narrated video of your web app" }
-    narration: "demo studio turns a list of steps into a narrated video of your web app."
-  - id: write
-    route: "/write"
+    caption: { n: 1, title: "Walkthrough videos", sub: "Without recording your screen" }
+    narration: "demo studio makes walkthrough videos of your web app, and your coding agent does the work."
+  - id: setup
+    route: "/setup"
+    action: click
+    target: "[data-demo=copy]"
+    zoom_on: "[data-demo=repo-card]"
+    zoom: 1.2
+    caption: { n: 2, title: "Paste one prompt", sub: "From the GitHub page" }
+    narration: "Paste one prompt from the GitHub page into Claude Code or another coding agent. It installs what is missing."
+  - id: describe
+    route: "/describe"
+    action: click
+    target: "[data-demo=send]"
+    wait_for: "[data-demo=sent]"
+    caption: { n: 3, title: "Describe the video", sub: "The app, the steps, the audience" }
+    narration: "Then describe the video you want, in plain words."
+  - id: work
+    route: "/work"
     action: wait_for
-    target: "[data-demo=yaml-steps]"
-    zoom: 1.35
-    caption: { n: 2, title: "Write the steps", sub: "A small YAML file" }
-    narration: "You write the steps in a small text file: where to click, what to type, and what to say."
-  - id: run
-    route: "/run"
-    action: type
-    target: "[data-demo=cmd]"
-    text: "studio render walkthrough.yaml\n"
-    wait_for: "[data-demo=render-done]"
+    target: "[data-demo=work]"
+    wait_for: "[data-demo=work-done]"
     speed_up: true
-    speed_factor: 20
-    timeout: 120
-    caption: { n: 3, title: "One command", sub: "The real log from this PC" }
-    narration: "Then you run one command. This is the real log from this PC, sped up, with the voice running on the CPU."
-  - id: watch
-    route: "/watch"
+    speed_factor: 100              # the real 12 minute session plays in about 7 seconds
+    timeout: 900
+    caption: { n: 4, title: "The agent does the rest", sub: "A real session" }
+    narration: "The agent looks at your app, writes the script, records the browser and reviews the frames. This is a real session, sped up."
+  - id: result
+    route: "/result"
     action: click
     target: "[data-demo=play]"
-    hold: 1.5
-    caption: { n: 4, title: "Clicked, narrated, captioned", sub: "Playwright, a local voice and ffmpeg" }
-    narration: "A browser clicks through your app, a local voice reads the script, and demo studio adds the captions and zoom."
-  - id: check
-    route: "/check"
-    action: wait_for
-    target: "[data-demo=gate]"
-    highlight: "[data-demo=banned]"
-    caption: { n: 5, title: "The quality gate", sub: "Checked before it ships" }
-    narration: "A quality gate checks the audio, the file and the text on each screen. You review the frames and sign off."
-  - id: modes
-    route: "/modes"
-    action: wait_for
-    target: "[data-demo=modes]"
-    highlight: "[data-demo=secrets]"
-    caption: { n: 6, title: "Real data stays private", sub: "Secrets are blurred before capture" }
-    narration: "Handover videos can show a client's real data and stay private. Passwords and keys are blurred before capture, and you sign in yourself."
+    hold: 1.0
+    caption: { n: 5, title: "Your video file", sub: "Voice, captions, zoom, subtitles" }
+    narration: "You get the video file, with a voice, captions, zoom and subtitles."
   - id: uses
     route: "/uses"
     action: wait_for
     target: "[data-demo=uses]"
-    caption: { n: 7, title: "What it is for", sub: "One storyboard, many videos" }
-    narration: "Use it for client handovers, portfolio videos, proposal clips and onboarding."
+    caption: { n: 6, title: "What people use it for", sub: "A few examples" }
+    narration: "Send a client this week's progress without recording a Loom, demo your portfolio projects, or show off a product."
+  - id: private
+    route: "/private"
+    action: wait_for
+    target: "[data-demo=modes]"
+    highlight: "[data-demo=secrets]"
+    caption: { n: 7, title: "Client data stays safe", sub: "Secrets blurred before capture" }
+    narration: "Client videos can use real data and stay on your machine. Passwords and keys are blurred, and you always sign in yourself."
   - id: free
     route: "/free"
     action: wait_for
     target: "[data-demo=free]"
     caption: { n: 8, title: "Free and open source", sub: "MIT licence, open models" }
-    narration: "It is free and open source under MIT, and it runs on your machine. You need no API key and no subscription."
-  - id: install
-    route: "/install"
+    narration: "It is free and open source, and it runs on your computer. You need no API key and no subscription."
+  - id: try
+    route: "/try"
     action: wait_for
-    target: "[data-demo=install]"
-    zoom: 1.3
+    target: "[data-demo=try]"
+    zoom: 1.25
     hold: 0.5
-    caption: { n: 9, title: "Try it", sub: "One command to install" }
-    narration: "Install it with one command, then run studio init for a starter project."
+    caption: { n: 9, title: "Try it", sub: "One prompt to start" }
+    narration: "Copy the prompt from the GitHub page and describe your first video."

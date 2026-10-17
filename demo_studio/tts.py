@@ -21,9 +21,38 @@ import soundfile as sf
 from .config import cache_dir
 
 SR = 24000
-_PIPE = None
+_PIPES: dict = {}   # one Kokoro pipeline per language (a: American English, b: British English)
 _ONNX = None
 _BACKEND = None
+
+# English voices in Kokoro v1.0 (voices-v1.0.bin). a = American, b = British; f = female, m = male.
+ENGLISH_VOICES = {
+    "af_alloy", "af_aoede", "af_bella", "af_heart", "af_jessica", "af_kore", "af_nicole", "af_nova", "af_river",
+    "af_sarah", "af_sky", "am_adam", "am_echo", "am_eric", "am_fenrir", "am_liam", "am_michael", "am_onyx",
+    "am_puck", "am_santa", "bf_alice", "bf_emma", "bf_isabella", "bf_lily", "bm_daniel", "bm_fable", "bm_george",
+    "bm_lewis",
+}
+# The clearest voices of each kind (Kokoro's own quality grades), used by voice: auto | female | male.
+VOICE_POOLS = {
+    "female": ["af_heart", "af_bella", "bf_emma"],
+    "male": ["am_michael", "am_fenrir", "bm_george", "am_puck"],
+}
+
+
+def pick_voice(spec, name: str) -> str:
+    """A voice id, `female`, `male`, `auto` (either), or a list of ids: the choice comes from the
+    video's name, so videos differ and a re-render keeps its voice."""
+    h = int(hashlib.sha1(str(name).encode()).hexdigest(), 16)
+    if isinstance(spec, (list, tuple)):
+        pool = [str(v) for v in spec]
+    elif spec == "auto":
+        pool = VOICE_POOLS["female"] + VOICE_POOLS["male"]
+    elif spec in VOICE_POOLS:
+        pool = VOICE_POOLS[spec]
+    else:
+        return str(spec or "af_heart")
+    return pool[h % len(pool)] if pool else "af_heart"
+
 
 ONNX_RELEASE = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/"
 ONNX_FILES = {  # name: sha256
@@ -56,13 +85,12 @@ def device() -> str:
 
 
 def _kokoro(text: str, voice: str, speed: float) -> np.ndarray:
-    global _PIPE
-    if _PIPE is None:
+    lang = voice[0] if voice[0] in "abefhijpz" else "a"
+    if lang not in _PIPES:
         from kokoro import KPipeline
-        lang = voice[0] if voice[0] in "abefhijpz" else "a"
-        _PIPE = KPipeline(lang_code=lang, repo_id="hexgrad/Kokoro-82M", device=device())
+        _PIPES[lang] = KPipeline(lang_code=lang, repo_id="hexgrad/Kokoro-82M", device=device())
     parts = []
-    for res in _PIPE(text, voice=voice, speed=speed, split_pattern=r"\n+"):
+    for res in _PIPES[lang](text, voice=voice, speed=speed, split_pattern=r"\n+"):
         audio = res.audio if hasattr(res, "audio") else res[2]
         if audio is None:
             continue
@@ -140,11 +168,23 @@ def line_wav(text: str, voice: str, speed: float, dest: Path) -> float:
     """Write the line to dest (cached by backend, voice, speed and text). Returns seconds."""
     key = hashlib.sha256(json.dumps([backend(), voice, speed, text]).encode()).hexdigest()[:20]
     cached = cache_dir() / "tts" / f"{key}.wav"
-    if not cached.exists():
+
+    def make() -> None:
+        # Written to a temporary name, then renamed: two renders running at once never read a
+        # half-written file.
         cached.parent.mkdir(parents=True, exist_ok=True)
-        sf.write(cached, synth(text, voice, speed), SR, subtype="PCM_16")
+        tmp = cached.with_name(f"{cached.stem}.{os.getpid()}.tmp.wav")
+        sf.write(tmp, synth(text, voice, speed), SR, subtype="PCM_16")
+        os.replace(tmp, cached)
+
+    if not cached.exists():
+        make()
     dest.parent.mkdir(parents=True, exist_ok=True)
-    data, sr = sf.read(cached, dtype="float32")
+    try:
+        data, sr = sf.read(cached, dtype="float32")
+    except Exception:  # a damaged cache entry (an older version wrote it in place): make it again
+        make()
+        data, sr = sf.read(cached, dtype="float32")
     sf.write(dest, data, sr, subtype="PCM_16")
     return len(data) / sr
 
@@ -154,6 +194,7 @@ def narrate(sb, audio_dir: Path) -> dict[str, dict]:
     out = {}
     for lid, text in sb.narration_lines():
         p = audio_dir / f"{lid}.wav"
-        secs = line_wav(text, sb.voice, sb.speed, p)
-        out[lid] = {"path": str(p), "seconds": round(secs, 3), "text": text}
+        voice = sb.voice_for(lid)
+        secs = line_wav(text, voice, sb.speed, p)
+        out[lid] = {"path": str(p), "seconds": round(secs, 3), "text": text, "voice": voice}
     return out

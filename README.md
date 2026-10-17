@@ -27,7 +27,17 @@ Show signing up, creating the first project and the dashboard. Made-up data only
 Add subtitles and a square version for LinkedIn. Give me the video file.
 ```
 
-The agent looks at your app, writes the script, renders, reviews every frame and hands you `video.mp4`. More prompts to copy (client handovers, onboarding, release notes, proposal clips) are in [docs/prompts.md](docs/prompts.md). The guide the agent follows is [AGENTS.md](AGENTS.md).
+The agent looks at your app, writes the script, puts it through the [humanizer](https://github.com/blader/humanizer) so it does not read as machine-written, renders, reviews every frame and hands you `video.mp4`. More prompts to copy are in [docs/prompts.md](docs/prompts.md), along with everything you can change (look, voice, length, layouts, shape). The guide the agent follows is [AGENTS.md](AGENTS.md).
+
+## What people use it for
+
+- **Client updates:** show this week's progress without recording a Loom each time.
+- **Client handovers:** how the system you built works, on the client's own data, kept private.
+- **Portfolio projects:** a short demo for every project you ship.
+- **Product demos:** launch posts, landing pages and proposal clips.
+- **Onboarding and release notes:** ask again when the app changes, and the video follows.
+
+It is built for client work. Passwords, keys and card numbers are masked in the page before any frame is captured. You sign in yourself, live systems stay read-only unless the owner confirms a change, and a client's video stays on your machine. Public videos are blocked if a client's name or contact details reach the screen.
 
 ## Quick start by hand
 
@@ -91,7 +101,7 @@ A cursor moves to each target and a ring marks it. A step that waits for a slow 
 
 ## The look
 
-Pick a theme (`petrol`, `kinetic` or `navy`), an intro layout, an outro layout and a caption style. The recording sits in a rounded window on one of 21 generated wallpapers, and the wallpaper drifts slowly behind the window. You can burn the narration in as subtitles for feeds that autoplay muted, and render a square variant of the same storyboard for social feeds.
+Pick a theme (`petrol`, `kinetic` or `navy`), an intro layout, an outro layout, a caption style and a voice (`female`, `male`, `auto` to vary it per video, or any Kokoro voice). The recording sits in a rounded window on one of 21 generated wallpapers, and the wallpaper drifts slowly behind the window. You can burn the narration in as subtitles for feeds that autoplay muted, and render a square variant of the same storyboard for social feeds.
 
 ```yaml
 style:
@@ -157,9 +167,11 @@ Items that wait on a person or a step show as PENDING and count as not passed.
 ```text
 /plugin marketplace add Maazsiddiqui01/demo-studio-oss
 /plugin install demo-studio@demo-studio-oss
+/plugin marketplace add blader/humanizer
+/plugin install humanizer@humanizer
 ```
 
-The plugin adds the `make-walkthrough` skill. It guides Claude through installing the CLI, picking a mode, writing the storyboard, rendering and the quality gate.
+The first plugin adds the `make-walkthrough` skill. The second adds [humanizer](https://github.com/blader/humanizer) (MIT, by blader), which the skill runs on every script before rendering. It guides Claude through installing the CLI, picking a mode, writing the storyboard, rendering and the quality gate.
 
 ## Options
 
