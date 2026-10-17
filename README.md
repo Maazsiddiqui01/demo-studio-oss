@@ -45,6 +45,8 @@ That is a real session, replayed in the showcase: the agent followed the two pro
 
 Set `driver: desktop` and demo-studio records a Windows app window instead of a web page: Power BI Desktop, Excel, an internal tool. It drives the app through Windows UI Automation with the real mouse and keyboard, records the window, and adds the same captions, zoom, voice and frame. Notifications and other apps' windows that pop up over the recording are blurred. Install the `desktop` extra and see [docs/desktop.md](docs/desktop.md).
 
+![A frame from a Power BI Desktop tour: zoomed on the what-if slider, the forecast cards updated, with the step caption and subtitles](docs/assets/desktop-powerbi.jpg)
+
 ```text
 Use demo-studio to make a 60 second tour of the Power BI report that is open on my screen.
 Show the sales page, filter by one product, then the what-if page. Public video, subtitles on.

@@ -5,6 +5,10 @@ internal tool, anything with a window. The storyboard, captions, zoom, voice, fr
 quality gate are the same as for a browser recording. Set `driver: desktop` and say which window
 to record.
 
+![A frame from a Power BI Desktop tour made by the desktop driver: zoomed on the what-if slider, the forecast cards updated, with the step caption and subtitles](assets/desktop-powerbi.jpg)
+
+The tour above uses Microsoft's Sales and Returns sample report, with fictional data.
+
 ## How it works
 
 - [pywinauto](https://github.com/pywinauto/pywinauto) finds controls through Windows UI Automation,

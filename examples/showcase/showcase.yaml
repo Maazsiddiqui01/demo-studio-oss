@@ -2,7 +2,8 @@
 #   studio render examples/showcase/showcase.yaml                    1920x1080
 #   studio render examples/showcase/showcase.yaml --variant square   1080x1080 for social feeds
 # What it shows is real: assets/session.js holds the README's two prompts and the steps of a real
-# coding-agent session that followed them; assets/result.webm is a clip of the video it made.
+# coding-agent session that followed them; assets/result.webm is a clip of the video it made;
+# assets/desktop.webm is a clip of a Power BI Desktop tour recorded by the desktop driver.
 version: 1
 name: demo-studio-showcase
 mode: public
@@ -29,6 +30,7 @@ sources:
   - "README.md, AGENTS.md and docs/prompts.md of github.com/Maazsiddiqui01/demo-studio-oss (the setup prompt, the flow, use cases)"
   - "examples/showcase/assets/session.js: the prompts and the steps of a real coding-agent session, with real times"
   - "examples/showcase/assets/result.webm: a clip of the video that session made, and its REPORT.md"
+  - "examples/showcase/assets/desktop.webm: a clip of a Power BI Desktop tour rendered by the desktop driver (docs/desktop.md), from Microsoft's Sales and Returns sample report (fictional data)"
   - "demo_studio/record.py: secrets are masked in the page before frames are captured; studio login: you sign in yourself"
   - "LICENSE (MIT); Kokoro-82M model card (Apache-2.0); Playwright (Apache-2.0); fonts (SIL OFL)"
 banned_terms: ["Acme Corp"]        # in your own videos: client names, companies, domains, people
@@ -58,8 +60,8 @@ steps:
     action: wait_for
     target: "[data-demo=hook]"
     highlight: "[data-demo=poster]"
-    caption: { n: 1, title: "Walkthrough videos", sub: "Without recording your screen" }
-    narration: "demo studio makes walkthrough videos of your web app, and your coding agent does the work."
+    caption: { n: 1, title: "Walkthrough videos", sub: "Web and desktop apps" }
+    narration: "demo studio makes walkthrough videos of web apps and desktop apps, and your coding agent does the work."
   - id: setup
     route: "/setup"
     action: click
@@ -84,7 +86,7 @@ steps:
     speed_factor: 100              # the real 12 minute session plays in about 7 seconds
     timeout: 900
     caption: { n: 4, title: "The agent does the rest", sub: "A real session" }
-    narration: "The agent looks at your app, writes the script, records the browser and reviews the frames. This is a real session, sped up."
+    narration: "The agent looks at your app, writes the script, records it and reviews the frames. This real session took twelve minutes, and the person typed two prompts."
   - id: result
     route: "/result"
     action: click
@@ -92,30 +94,37 @@ steps:
     hold: 1.0
     caption: { n: 5, title: "Your video file", sub: "Voice, captions, zoom, subtitles" }
     narration: "You get the video file, with a voice, captions, zoom and subtitles."
+  - id: desktop
+    route: "/desktop"
+    action: click
+    target: "[data-demo=play2]"
+    hold: 1.5
+    caption: { n: 6, title: "Desktop apps too", sub: "Power BI Desktop" }
+    narration: "Desktop apps work too. Here it clicked through a report in Power BI Desktop, then added the captions, zoom and voice."
   - id: uses
     route: "/uses"
     action: wait_for
     target: "[data-demo=uses]"
-    caption: { n: 6, title: "What people use it for", sub: "A few examples" }
-    narration: "Send a client this week's progress without recording a Loom, demo your portfolio projects, or show off a product."
+    caption: { n: 7, title: "What people use it for", sub: "A few examples" }
+    narration: "Send a client this week's progress without recording a Loom, hand over a dashboard, or demo your portfolio and class projects."
   - id: private
     route: "/private"
     action: wait_for
     target: "[data-demo=modes]"
     highlight: "[data-demo=secrets]"
-    caption: { n: 7, title: "Client data stays safe", sub: "Secrets blurred before capture" }
+    caption: { n: 8, title: "Client data stays safe", sub: "Secrets blurred before capture" }
     narration: "Client videos can use real data and stay on your machine. Passwords and keys are blurred, and you always sign in yourself."
   - id: free
     route: "/free"
     action: wait_for
     target: "[data-demo=free]"
-    caption: { n: 8, title: "Free and open source", sub: "MIT licence, open models" }
-    narration: "It is free and open source, and it runs on your computer. You need no API key and no subscription."
+    caption: { n: 9, title: "Free and open source", sub: "MIT licence, open models" }
+    narration: "It is free and open source, and it runs on your computer, with no API key and no subscription."
   - id: try
     route: "/try"
     action: wait_for
     target: "[data-demo=try]"
     zoom: 1.25
     hold: 0.5
-    caption: { n: 9, title: "Try it", sub: "One prompt to start" }
-    narration: "Copy the prompt from the GitHub page and describe your first video."
+    caption: { n: 10, title: "Try it", sub: "One prompt to start" }
+    narration: "To follow along, copy the prompt from the GitHub page, then describe your first video."

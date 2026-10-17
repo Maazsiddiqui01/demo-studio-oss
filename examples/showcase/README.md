@@ -13,6 +13,9 @@ Everything the video shows comes from one real run of that flow:
   itself, rendered the video and reviewed the frames.
 - `assets/result.webm` is a clip of the video that session made, and `assets/result.jpg` its
   poster. (Playwright's Chromium does not play H.264, so the clip is VP9.)
+- `assets/desktop.webm` is a clip of a Power BI Desktop tour that the desktop driver recorded
+  ([docs/desktop.md](../../docs/desktop.md)), cropped to the app window. The report is Microsoft's
+  Sales and Returns sample, with fictional data. `assets/desktop.jpg` is its poster.
 - The secrets scene shows the real masking: the password field and the fake API key are blurred
   by demo-studio while it records.
 

@@ -8,7 +8,8 @@
      assets/session.js  the README's two prompts and the steps of a real coding-agent session that
                         followed them (installed demo-studio from GitHub, wrote the script, rendered,
                         reviewed the frames), with real elapsed times;
-     assets/result.webm a clip of the video that session produced; assets/result.jpg its poster.
+     assets/result.webm a clip of the video that session produced; assets/result.jpg its poster;
+     assets/desktop.webm a clip of a Power BI Desktop tour that demo-studio's desktop driver recorded.
      Scenes are client-side routes, so the storyboard uses navigation: spa. -->
 <style>
   :root { --ink: #0B1618; --ink2: #2F4448; --ink3: #5A6D71; --mist: #EEF4F3; --line: #DCE5E5; --teal: #0A7A74;
@@ -118,6 +119,7 @@
   .use h4 { margin: 10px 0 0; font-family: var(--display); font-stretch: 80%; font-weight: 800; font-size: 28px; line-height: 1.05; }
   .use p { margin: 8px 0 0; font-size: 16px; opacity: .85; }
   .more { margin-top: 18px; color: var(--ink3); font-size: 17px; }
+  .ask-card { margin-top: 26px; max-width: 520px; font-size: 16px; }
 
   /* modes */
   .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 26px; }
@@ -161,6 +163,7 @@
     .big { font-size: 150px; }
     .files { margin-top: 12px; grid-template-columns: 1fr 1fr; max-width: none; } .file small { display: none; }
     .repo { font-size: 15px; }
+    .ask-card { margin-top: 12px; font-size: 14px; max-width: none; }
     .hide-sq { display: none !important; }
   }
 </style>
@@ -178,7 +181,7 @@
       <div>
         <div class="eyebrow">Open source</div>
         <h1 data-demo="hook">Walkthrough videos <span class="hl">without recording</span></h1>
-        <p class="lede">Paste one prompt into your coding agent. Describe the video. Get the file.</p>
+        <p class="lede">Web apps and desktop apps. Paste one prompt into your coding agent, describe the video, get the file.</p>
         <div class="flow"><span class="chip">one prompt</span><span class="arr">&rarr;</span><span class="chip">your description</span><span class="arr">&rarr;</span><span class="chip dark">video.mp4</span></div>
       </div>
       <div class="poster" data-demo="poster" style="background-image:url(/assets/result.jpg)"><span class="play"></span><span class="badge chip dark">made by a coding agent</span></div>
@@ -248,16 +251,31 @@
     </div>
   </section>
 
+  <section class="scene" data-route="/desktop">
+    <div class="row">
+      <div>
+        <div class="eyebrow">Desktop apps too</div>
+        <h2>Power BI, Excel, <span class="hl">any window</span></h2>
+        <p class="lede">The same flow records a Windows app with real clicks, then adds the captions, zoom and voice.</p>
+        <div class="msg you ask-card" data-demo="desktop-ask"><small>example prompt</small>Make a short tour of the Power BI report open on my screen: the sales page, one product filter, then the what-if slider. Subtitles on.</div>
+      </div>
+      <div class="player" data-demo="player2" id="player2">
+        <video id="vid2" src="/assets/desktop.webm" muted playsinline preload="auto" poster="/assets/desktop.jpg"></video>
+        <div class="ctl"><button data-demo="play2" id="play2" aria-label="Play"></button><div class="track"><i id="track2"></i></div><span id="time2">0:00</span></div>
+      </div>
+    </div>
+  </section>
+
   <section class="scene" data-route="/uses">
     <div class="eyebrow">What people use it for</div>
     <h2>Show the work, skip the recording</h2>
     <div class="uses" data-demo="uses">
       <div class="use dark"><b>01</b><h4>Client updates</h4><p>Show this week's progress without recording a Loom each time.</p></div>
-      <div class="use"><b>02</b><h4>Portfolio projects</h4><p>A short demo for every project you ship.</p></div>
-      <div class="use teal"><b>03</b><h4>Product demos</h4><p>Launch posts and landing pages.</p></div>
-      <div class="use"><b>04</b><h4>Client handovers</h4><p>How the system you built works, on their own data.</p></div>
-      <div class="use"><b>05</b><h4>Onboarding</h4><p>New users see each step once.</p></div>
-      <div class="use hide-sq"><b>06</b><h4>Release notes</h4><p>Ask again when the app changes.</p></div>
+      <div class="use"><b>02</b><h4>Client handovers</h4><p>How the system you built works, on their own data.</p></div>
+      <div class="use teal"><b>03</b><h4>Dashboard tours</h4><p>Walk through a Power BI or Excel report.</p></div>
+      <div class="use"><b>04</b><h4>Portfolio projects</h4><p>A short demo for every project you ship.</p></div>
+      <div class="use"><b>05</b><h4>Class projects</h4><p>Show your project working, with a voice.</p></div>
+      <div class="use hide-sq"><b>06</b><h4>Product demos</h4><p>Launch posts and landing pages.</p></div>
     </div>
   </section>
 
@@ -359,6 +377,16 @@
     v.addEventListener("timeupdate", () => {
       $("track").style.width = `${100 * v.currentTime / (v.duration || 1)}%`;
       $("time").textContent = `0:${String(Math.floor(v.currentTime)).padStart(2, "0")}`;
+    });
+  })();
+
+  // the desktop clip
+  (function desktop() {
+    const v = $("vid2");
+    $("play2").addEventListener("click", () => { v.play(); $("player2").classList.add("playing"); });
+    v.addEventListener("timeupdate", () => {
+      $("track2").style.width = `${100 * v.currentTime / (v.duration || 1)}%`;
+      $("time2").textContent = `0:${String(Math.floor(v.currentTime)).padStart(2, "0")}`;
     });
   })();
 
