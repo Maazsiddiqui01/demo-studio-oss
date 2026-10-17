@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Pipeline test</title>
+<style>
+ body{font-family:"Segoe UI",system-ui,sans-serif;margin:0;background:#f8fafc;color:#0f172a}
+ main{max-width:900px;margin:80px auto;padding:40px;background:#fff;border:1px solid #e2e8f0;border-radius:16px}
+ h1{margin:0 0 12px;font-size:34px} p{color:#475569;font-size:18px}
+ button{font:inherit;font-size:18px;padding:12px 22px;border-radius:10px;border:0;background:#2563eb;color:#fff;cursor:pointer}
+ button:hover{background:#1d4ed8}
+ .bar{height:10px;background:#e2e8f0;border-radius:6px;margin:24px 0;overflow:hidden}
+ .bar i{display:block;height:100%;width:0;background:#22c55e;transition:width 5s linear}
+ #done{display:none;font-size:22px;font-weight:600;color:#15803d}
+</style></head>
+<body><main>
+ <h1 data-demo="heading">A two-step pipeline test</h1>
+ <p>This page exists to test demo-studio. The key below must be blurred: sk-demo0000notarealkey0000</p>
+ <button data-demo="start">Start the job</button>
+ <div class="bar"><i id="bar"></i></div>
+ <div id="done" data-demo="done">Finished. Nothing was sent.</div>
+</main>
+<script>
+ document.querySelector('[data-demo=start]').addEventListener('click', () => {
+   document.getElementById('bar').style.width = '100%';
+   setTimeout(() => { document.getElementById('done').style.display = 'block'; }, 5000);
+ });
+</script></body></html>

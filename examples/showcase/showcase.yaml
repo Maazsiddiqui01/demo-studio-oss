@@ -1,0 +1,114 @@
+# The demo-studio showcase: a video about demo-studio, made by demo-studio.
+#   studio render examples/showcase/showcase.yaml                    1920x1080
+#   studio render examples/showcase/showcase.yaml --variant square   1080x1080 for social feeds
+# Every artifact on screen is real: assets/ holds one render of the starter project (studio init).
+version: 1
+name: demo-studio-showcase
+mode: public
+title: "Walkthrough videos from *a text file*"
+eyebrow: "DEMO-STUDIO · FREE AND OPEN SOURCE"
+intro_note: "Made by demo-studio itself. Nobody recorded the screen."
+intro:
+  layout: statement
+  narration: "This video was made by the tool it shows. Nobody recorded the screen."
+outro:
+  layout: cta
+  heading: "Make your *first video*"
+  bullets: ["Storyboard in, narrated video out", "MIT licence, runs on your machine"]
+  cta: "github.com/Maazsiddiqui01/demo-studio-oss"
+  narration: "The link is on screen."
+
+base_url: "http://localhost:5207"
+serve: "."
+navigation: spa
+auth: null
+voice: "af_heart"
+viewport: auto                     # fills the canvas at 1:1; the app scales its design to fit
+sources:
+  - "README.md and docs/ of github.com/Maazsiddiqui01/demo-studio-oss (what the tool does, the two modes, the gate)"
+  - "examples/showcase/assets/artifacts.js: the storyboard, the real render log and the gate results of one starter render"
+  - "LICENSE (MIT); Kokoro-82M model card (Apache-2.0); Playwright (Apache-2.0); fonts (SIL OFL)"
+  - "demo_studio/record.py: secrets are masked in the page before frames are captured; studio login: you sign in yourself"
+banned_terms: ["Acme Corp"]              # in your own videos: client names, companies, domains, people
+allowed_hosts: ["github.com"]
+style:
+  background: lagoon                 # any preset, a category (blue, dark...), a list, or auto
+  theme: kinetic
+  captions: card
+  subtitles: true
+  music: ambient
+delivery: { public: true, private_link: false, expires: null, local_only: false }
+poster: "hook@1.2"
+variants:
+  square:
+    name: demo-studio-showcase-square
+    viewport: [960, 854]
+    style: { canvas: [1080, 1080], padding: 0.05, background: ocean }
+
+steps:
+  - id: hook
+    route: "/"
+    action: wait_for
+    target: "[data-demo=hook]"
+    highlight: "[data-demo=poster]"
+    caption: { n: 1, title: "From steps to video", sub: "A narrated video of your web app" }
+    narration: "demo studio turns a list of steps into a narrated video of your web app."
+  - id: write
+    route: "/write"
+    action: wait_for
+    target: "[data-demo=yaml-steps]"
+    zoom: 1.35
+    caption: { n: 2, title: "Write the steps", sub: "A small YAML file" }
+    narration: "You write the steps in a small text file: where to click, what to type, and what to say."
+  - id: run
+    route: "/run"
+    action: type
+    target: "[data-demo=cmd]"
+    text: "studio render walkthrough.yaml\n"
+    wait_for: "[data-demo=render-done]"
+    speed_up: true
+    speed_factor: 20
+    timeout: 120
+    caption: { n: 3, title: "One command", sub: "The real log from this PC" }
+    narration: "Then you run one command. This is the real log from this PC, sped up, with the voice running on the CPU."
+  - id: watch
+    route: "/watch"
+    action: click
+    target: "[data-demo=play]"
+    hold: 1.5
+    caption: { n: 4, title: "Clicked, narrated, captioned", sub: "Playwright, a local voice and ffmpeg" }
+    narration: "A browser clicks through your app, a local voice reads the script, and demo studio adds the captions and zoom."
+  - id: check
+    route: "/check"
+    action: wait_for
+    target: "[data-demo=gate]"
+    highlight: "[data-demo=banned]"
+    caption: { n: 5, title: "The quality gate", sub: "Checked before it ships" }
+    narration: "A quality gate checks the audio, the file and the text on each screen. You review the frames and sign off."
+  - id: modes
+    route: "/modes"
+    action: wait_for
+    target: "[data-demo=modes]"
+    highlight: "[data-demo=secrets]"
+    caption: { n: 6, title: "Real data stays private", sub: "Secrets are blurred before capture" }
+    narration: "Handover videos can show a client's real data and stay private. Passwords and keys are blurred before capture, and you sign in yourself."
+  - id: uses
+    route: "/uses"
+    action: wait_for
+    target: "[data-demo=uses]"
+    caption: { n: 7, title: "What it is for", sub: "One storyboard, many videos" }
+    narration: "Use it for client handovers, portfolio videos, proposal clips and onboarding."
+  - id: free
+    route: "/free"
+    action: wait_for
+    target: "[data-demo=free]"
+    caption: { n: 8, title: "Free and open source", sub: "MIT licence, open models" }
+    narration: "It is free and open source under MIT, and it runs on your machine. You need no API key and no subscription."
+  - id: install
+    route: "/install"
+    action: wait_for
+    target: "[data-demo=install]"
+    zoom: 1.3
+    hold: 0.5
+    caption: { n: 9, title: "Try it", sub: "One command to install" }
+    narration: "Install it with one command, then run studio init for a starter project."

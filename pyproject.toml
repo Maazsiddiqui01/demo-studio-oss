@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "demo-studio"
+dynamic = ["version"]
+description = "Storyboard in, narrated product-walkthrough video out. Playwright drives your app, a local voice reads the script."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+requires-python = ">=3.10"
+authors = [{ name = "Muhammad Maaz Siddiqui" }]
+keywords = ["walkthrough", "demo video", "screen recording", "playwright", "tts", "kokoro", "product demo"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Topic :: Multimedia :: Video",
+  "Environment :: Console",
+]
+dependencies = [
+  "playwright>=1.61,<2",
+  "pyyaml>=6",
+  "numpy>=1.26",
+  "soundfile>=0.12",
+  "kokoro-onnx>=0.4.9",
+  "imageio-ffmpeg>=0.5",
+]
+
+[project.optional-dependencies]
+# Kokoro on torch: uses a CUDA GPU when there is one (install torch for your CUDA first)
+gpu = ["kokoro>=0.9.4"]
+# The gate's speech check: transcribes the final audio and compares it with the script
+check = ["faster-whisper>=1.1"]
+# Private links on your own server (Caddy basic auth)
+server = ["bcrypt>=4"]
+dev = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/Maazsiddiqui01/demo-studio-oss"
+Issues = "https://github.com/Maazsiddiqui01/demo-studio-oss/issues"
+
+[project.scripts]
+studio = "demo_studio.cli:main"
+demo-studio = "demo_studio.cli:main"
+
+[tool.setuptools]
+packages = ["demo_studio"]
+
+[tool.setuptools.dynamic]
+version = { attr = "demo_studio.__version__" }
+
+[tool.setuptools.package-data]
+demo_studio = ["*.js", "templates/*", "templates/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,16 @@
+out/
+site/
+*.mp4
+*.wav
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+*.storage.json
+storage_state*.json
+.env
+.env.*

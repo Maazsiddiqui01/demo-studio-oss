@@ -1,0 +1,10 @@
+{
+  "name": "demo-studio",
+  "version": "0.2.0",
+  "description": "Make a narrated walkthrough video of a web app with the demo-studio CLI (storyboard in, MP4 out).",
+  "author": { "name": "Muhammad Maaz Siddiqui", "url": "https://github.com/Maazsiddiqui01" },
+  "homepage": "https://github.com/Maazsiddiqui01/demo-studio-oss",
+  "repository": "https://github.com/Maazsiddiqui01/demo-studio-oss",
+  "license": "MIT",
+  "keywords": ["walkthrough", "demo video", "playwright", "tts", "screen recording"]
+}

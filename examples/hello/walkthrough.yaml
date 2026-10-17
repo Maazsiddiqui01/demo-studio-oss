@@ -1,0 +1,39 @@
+# The smallest example: one page, two steps, a fake key that must come out blurred.
+#   studio render examples/hello/walkthrough.yaml
+version: 1
+name: hello-demo-studio
+mode: public
+title: "A *two-step* test"
+eyebrow: "DEMO STUDIO EXAMPLE"
+intro_note: "Two steps. The wait in step two is sped up."
+intro:
+  narration: "This is a short test of demo studio."
+outro:
+  heading: "Test complete"
+  bullets: ["Captions, ring and cursor drawn in the page", "Waiting time sped up and labelled"]
+  narration: "That is the end of the test."
+base_url: "http://localhost:5199"
+serve: "."
+navigation: load
+auth: null
+voice: "af_heart"
+viewport: [1440, 900]
+sources: ["examples/hello/index.html (a test page)"]
+banned_terms: []
+style: { background: auto, music: none }
+delivery: { public: false, private_link: false, expires: null, local_only: true }
+steps:
+  - id: page
+    route: "/"
+    action: wait_for
+    target: "[data-demo=heading]"
+    caption: { n: 1, title: "A test page", sub: "The key on this page is blurred" }
+    narration: "Here is the test page. The key in the text is blurred before any frame is captured."
+  - id: start
+    action: click
+    target: "[data-demo=start]"
+    wait_for: "[data-demo=done]"
+    speed_up: true
+    zoom: auto
+    caption: { n: 2, title: "Start a job and wait", sub: "The wait plays four times faster" }
+    narration: "Clicking start runs a five second job. The wait is sped up, and the video says so."
