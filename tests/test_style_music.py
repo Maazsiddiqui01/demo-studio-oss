@@ -148,3 +148,23 @@ def test_a_step_can_have_its_own_narrator(tmp_path):
     ]
     sb = load(build(tmp_path, steps=steps, voice="af_heart"))
     assert sb.voice_for("a") == "am_michael" and sb.voice_for("b") == "af_heart" and sb.voice_for("_intro") == "af_heart"
+
+
+def test_desktop_selectors_and_storyboard(tmp_path):
+    from demo_studio.desktop import SelectorError, parse_selector
+    assert parse_selector("name=Save; type=Button") == {"title": "Save", "control_type": "Button"}
+    assert parse_selector("id=CalculatorResults; index=1") == {"auto_id": "CalculatorResults", "found_index": 1}
+    assert parse_selector("at=640, 360") == {"at": (640, 360)}
+    for bad in ("Save", "label=Save", "at=x,y"):
+        with pytest.raises(SelectorError):
+            parse_selector(bad)
+    steps = [{"id": "a", "action": "click", "target": "name=Seven; type=Button", "caption": {"n": 1, "title": "A"},
+              "narration": "One."},
+             {"id": "b", "action": "key", "keys": "^s", "caption": {"n": 2, "title": "B"}, "narration": "Two."}]
+    sb = load(build(tmp_path, driver="desktop", app={"window": "^Calculator$"}, base_url=None, steps=steps))
+    assert sb.driver == "desktop" and sb.steps[1].keys == "^s"
+    with pytest.raises(StoryboardError) as e:
+        load(build(tmp_path, driver="desktop", base_url=None,
+                   steps=[dict(steps[0], target="Seven", route="/x")]))
+    msg = "\n".join(e.value.errors)
+    assert "app.window" in msg and "steps.a.target" in msg and "routes are for the browser" in msg

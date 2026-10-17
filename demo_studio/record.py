@@ -264,12 +264,17 @@ class Recorder:
                 self.log(f"  step {step.caption.n} {step.id}")
                 await self.ds("ringOff()")
                 new_page = bool(step.route and step.route != self.current_route)
-                if self.zoomed and (not step.zoom or new_page):
-                    await self.zoom_out()
+                cap = {"n": step.caption.n, "total": len(sb.steps), "title": step.caption.title, "sub": step.caption.sub}
                 if new_page:
+                    if self.zoomed:
+                        await self.zoom_out()
                     await self.navigate(step.route)
-                await self.ds("caption(a)", {"n": step.caption.n, "total": len(sb.steps),
-                                             "title": step.caption.title, "sub": step.caption.sub})
+                    await self.ds("caption(a)", cap)
+                else:
+                    # the caption changes as the step starts; a zoom-out from the last step plays meanwhile
+                    await self.ds("caption(a)", cap)
+                    if self.zoomed and not step.zoom:
+                        await self.zoom_out()
                 if step.highlight:
                     hl = page.locator(step.highlight).first
                     await hl.wait_for(state="visible", timeout=step.timeout * 1000)

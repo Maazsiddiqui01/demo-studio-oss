@@ -74,7 +74,6 @@ def cmd_validate(a) -> int:
 def render_one(sb, a) -> dict:
     from . import tts
     from .assemble import assemble
-    from .gate import run_checks
     from .record import record
 
     out = config.out_dir_for(sb)
@@ -85,13 +84,32 @@ def render_one(sb, a) -> dict:
     if sb.mode == "handover" and not sb.local_copy:
         log(f"[{sb.name}] handover mode: real data, private output under {out}")
     t = time.time()
+    if getattr(a, "reassemble", False):
+        # encode again from the recording already on disk (kept after a failed encode, or by --keep-frames)
+        need = [out / "timeline.json", out / "narration.json", out / "frames"]
+        missing = [x.name for x in need if not x.exists()]
+        if missing:
+            raise SystemExit(f"[{sb.name}] --reassemble needs a kept recording in {out}; missing: {', '.join(missing)}")
+        narr = json.loads((out / "narration.json").read_text(encoding="utf-8"))
+        timeline = json.loads((out / "timeline.json").read_text(encoding="utf-8"))
+        if timeline.get("viewport"):
+            sb.viewport = tuple(timeline["viewport"])
+        log(f"[{sb.name}] reassemble: {len(timeline['frames'])} recorded frames")
+        info = assemble(sb, timeline, narr, out, keep_frames=a.keep_frames, log=log)
+        return _gate_and_report(sb, a, out, info, t)
     log(f"[{sb.name}] narrate: {len(sb.narration_lines())} lines, voice {sb.voice}, backend {tts.backend()} on {tts.device()}")
     narr = tts.narrate(sb, out / "audio")
     (out / "narration.json").write_text(json.dumps(narr, indent=2), encoding="utf-8")
-    log(f"[{sb.name}] record: {sb.base_url} at {sb.viewport[0]}x{sb.viewport[1]}")
-    from .serve import serving
-    with serving(sb):
-        timeline, strings, masked = record(sb, narr, out, headless=not a.headed, log=log)
+    if sb.driver == "desktop":
+        from .desktop import record_desktop
+        log(f"[{sb.name}] record: the desktop window matching {sb.app.get('window')!r}")
+        timeline, strings, masked = record_desktop(sb, narr, out, log=log)
+        sb.viewport = tuple(timeline["viewport"])  # the window's size is the recording's size
+    else:
+        log(f"[{sb.name}] record: {sb.base_url} at {sb.viewport[0]}x{sb.viewport[1]}")
+        from .serve import serving
+        with serving(sb):
+            timeline, strings, masked = record(sb, narr, out, headless=not a.headed, log=log)
     (out / "timeline.json").write_text(json.dumps(timeline), encoding="utf-8")
     (out / "strings.json").write_text(json.dumps(strings, indent=1), encoding="utf-8")
     (out / "masked.json").write_text(json.dumps(masked, indent=1), encoding="utf-8")
@@ -105,6 +123,11 @@ def render_one(sb, a) -> dict:
                 "- Contains the client's real data. Private: for this client only.\n"
                 "- Received by: (fill in when you deliver it)\n- The owner decides when it is deleted.\n",
                 encoding="utf-8")
+    return _gate_and_report(sb, a, out, info, t)
+
+
+def _gate_and_report(sb, a, out, info: dict, t: float) -> dict:
+    from .gate import run_checks
     log(f"[{sb.name}] gate")
     res = run_checks(sb, out, cost=a.cost, speech=not a.no_speech)
     log(f"[{sb.name}] done in {time.time() - t:.0f}s: {info['total']:.1f}s video at {out / 'video.mp4'}")
@@ -297,6 +320,20 @@ def cmd_slides(a) -> int:
     return 0
 
 
+def cmd_windows(a) -> int:
+    from .desktop import list_windows
+    for w in list_windows():
+        x, y, ww, hh = w["rect"]
+        log(f"{w['title']}   ({ww}x{hh} at {x},{y})")
+    return 0
+
+
+def cmd_inspect(a) -> int:
+    from .desktop import inspect
+    inspect(a.window, depth=a.depth, limit=a.limit, log=log)
+    return 0
+
+
 def cmd_backgrounds(a) -> int:
     from .preview import backgrounds
     backgrounds(Path(a.out), log=log)
@@ -324,9 +361,17 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--headed", action="store_true"); s.add_argument("--keep-frames", action="store_true")
     s.add_argument("--no-cut", action="store_true"); s.add_argument("--cut-only", action="store_true")
     s.add_argument("--no-speech", action="store_true", help="skip the faster-whisper check")
+    s.add_argument("--reassemble", action="store_true",
+                   help="encode again from the kept recording (frames/, timeline.json) without recording")
     s.add_argument("--cost", default=None); s.set_defaults(fn=cmd_render)
     s = sub.add_parser("slides", help="stills of every intro, outro and caption design over your app")
     s.add_argument("storyboard"); s.add_argument("--variant"); s.add_argument("--out"); s.set_defaults(fn=cmd_slides)
+    s = sub.add_parser("windows", help="desktop driver: list the open windows")
+    s.set_defaults(fn=cmd_windows)
+    s = sub.add_parser("inspect", help="desktop driver: list a window's controls with selectors")
+    s.add_argument("window", help="a regular expression matching the window title")
+    s.add_argument("--depth", type=int, default=6); s.add_argument("--limit", type=int, default=400)
+    s.set_defaults(fn=cmd_inspect)
     s = sub.add_parser("backgrounds", help="a gallery of every wallpaper preset")
     s.add_argument("--out", default="backgrounds.png"); s.set_defaults(fn=cmd_backgrounds)
     s = sub.add_parser("check"); s.add_argument("out")

@@ -74,6 +74,22 @@ weekly report is. It is their live system, so keep every step read-only. Tell me
 with `studio login`; I will sign in myself.
 ```
 
+**A Power BI report tour (desktop app, Windows)**
+
+```text
+Use demo-studio to make a 60 second tour of the Power BI report that is open in Power BI Desktop.
+Show the overview page, filter by one product, then the what-if page. Public video with subtitles.
+Tell me before you start recording, so I keep my hands off the mouse.
+```
+
+**A desktop app handover**
+
+```text
+Use demo-studio to make a private handover video of the Excel workbook I built for my client,
+open on my screen. Show the input sheet, the refresh, and the summary dashboard. Read-only:
+never save the file. Tell me before you start recording.
+```
+
 **Onboarding for new users**
 
 ```text
@@ -124,6 +140,7 @@ You can ask for any of these by name, or describe the effect you want:
 | Sound | a quiet music bed, your own music file, or none |
 | Shape | 16:9, square, or any canvas size, from the same script |
 | Privacy | public (demo data, banned names) or private handover (real data, stays on your machine) |
+| App type | a web app (any URL) or a Windows desktop app window (Power BI Desktop, Excel, your own tool) |
 | Publishing | a local folder, or your own server with an optional private link that expires |
 
 Every key is documented in [storyboard-format.md](storyboard-format.md).

@@ -7,7 +7,8 @@ from dataclasses import dataclass
 DASHES = {"\u2014": "em dash", "\u2013": "en dash"}
 
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
-PHONE_CANDIDATE = re.compile(r"(?<![\w/])\+?\(?\d[\d\s().-]{7,}\d(?![\w/])")
+# a phone number stays on one line: a column of figures, one per line, is not one
+PHONE_CANDIDATE = re.compile(r"(?<![\w/])\+?\(?\d[\d \t().-]{7,}\d(?![\w/])")
 ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 URL = re.compile(
     r"\bhttps?://[^\s\"'<>]+|\bwww\.[^\s\"'<>]+|"

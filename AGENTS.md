@@ -22,12 +22,15 @@ do that work. Ask them only for what you cannot find out yourself, in one short 
    On Linux, if Chromium cannot start because system libraries are missing, ask the person to
    install Playwright's system dependencies (they need sudo):
    https://playwright.dev/python/docs/browsers#install-system-dependencies
-5. Claude Code only, optional: add the plugins so the `make-walkthrough` and `humanizer` skills
+5. Windows only, when the person wants videos of desktop apps (Power BI Desktop, Excel, any
+   window): install the `desktop` extra as well, for example
+   `uv tool install --force "demo-studio[desktop] @ git+https://github.com/Maazsiddiqui01/demo-studio-oss"`.
+6. Claude Code only, optional: add the plugins so the `make-walkthrough` and `humanizer` skills
    load in later sessions: `claude plugin marketplace add Maazsiddiqui01/demo-studio-oss`,
    `claude plugin install demo-studio@demo-studio-oss`, `claude plugin marketplace add blader/humanizer`
    and `claude plugin install humanizer@humanizer`. If you cannot run these, give the person the
    `/plugin` commands from the README to type.
-6. Tell the person it is ready, what you installed, and that they can now describe a video.
+7. Tell the person it is ready, what you installed, and that they can now describe a video.
 
 Nothing in the setup needs an API key, an account or a paid service.
 
@@ -37,7 +40,9 @@ Nothing in the setup needs an API key, an account or a paid service.
 
 Ask only for what is missing:
 
-- **The app:** a URL (local or deployed), or the repo or folder and how to start it.
+- **The app:** a URL (local or deployed), or the repo or folder and how to start it. It can also
+  be a Windows desktop app: then ask which window, and record it with the desktop driver
+  ([docs/desktop.md](docs/desktop.md)).
 - **What to show:** the flows or features, in order.
 - **Who will watch:** anyone (`mode: public`) or one client about their own system
   (`mode: handover`). If the app shows real customer data and the video is public, stop and ask
@@ -53,6 +58,16 @@ Ask only for what is missing:
    note the controls for each flow. Pick stable selectors: `data-*` attributes first, then
    Playwright's role and text selectors (`role=button[name="Save"]`, `text=Save`). In an app you
    are working on, adding `data-demo="..."` attributes is fine if the person agrees.
+
+   For a desktop app, set `driver: desktop` and `app.window` (a regular expression for the window
+   title). `studio windows` lists the open windows and `studio inspect "<title>"` prints each
+   control with a selector (`name=Save; type=Button`). Where controls have no names, as on a Power
+   BI report canvas, take a screenshot of the window and use `at=X,Y` in window pixels. Before you
+   render, tell the person that the mouse and keyboard will move by themselves for about the
+   length of the video and that they should not touch the machine. Suggest turning on Do Not
+   Disturb; demo-studio blurs notifications that cover the window, but never change the person's
+   system settings yourself. Put the app back in its starting state before each new render
+   (filters, sliders and selections keep their state), and never save the person's file.
 2. **Write the storyboard yourself** as `walkthroughs/<name>.yaml` in the project. `studio init`
    writes a commented starter to copy from; every key is in `docs/storyboard-format.md`. For each
    step: one action, a caption title of three to five words with a short subtitle, and one or two
@@ -99,6 +114,9 @@ Ask only for what is missing:
   selectors for settings pages under `redact:`. Masking does not reach inside iframes.
 - Humanize the script before every render (step 3). The validator also rejects em and en dashes
   and warns on hype words.
+- On a desktop app, a `key` step that may save, delete or submit (`^s`, `{ENTER}`, `{DELETE}`)
+  counts as a write. Clicks by position (`at=X,Y`) cannot be checked, so make sure each one only
+  changes the view.
 - Do not commit `out/` or saved sessions.
 
 ## 3. Reference
@@ -106,6 +124,7 @@ Ask only for what is missing:
 - [README](README.md): what it does and the options.
 - [docs/prompts.md](docs/prompts.md): prompts people paste to ask for a video.
 - [docs/storyboard-format.md](docs/storyboard-format.md): every storyboard key.
+- [docs/desktop.md](docs/desktop.md): recording Windows desktop apps.
 - [docs/modes-and-privacy.md](docs/modes-and-privacy.md): public and handover mode, sign-in, masking.
 - [docs/quality-gate.md](docs/quality-gate.md): what the checks cover.
 - [docs/publishing.md](docs/publishing.md): a folder or your own server.

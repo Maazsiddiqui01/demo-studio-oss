@@ -12,7 +12,7 @@ import yaml
 
 from . import textscan
 
-ACTIONS = {"click", "type", "wait_for", "scroll", "goto", "pause", "hover"}
+ACTIONS = {"click", "type", "wait_for", "scroll", "goto", "pause", "hover", "key"}
 SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{1,62}$")
 # On a live system, a click on a control with one of these words may write data.
 RISKY_WORDS = re.compile(
@@ -20,6 +20,8 @@ RISKY_WORDS = re.compile(
     r"publish|post|merge|import|sync|run|undo|restore|pay|charge|invite|disconnect|revoke|reset)\b",
     re.IGNORECASE,
 )
+# Desktop key steps that may save, delete or submit (pywinauto syntax: ^ is Ctrl, ~ is Enter).
+RISKY_KEYS = re.compile(r"\^\+?s\b|\{(DEL|DELETE|ENTER|BACKSPACE|BKSP|BS)[ }]|~|%\{F4\}", re.IGNORECASE)
 
 
 THEMES = ("petrol", "kinetic", "navy")
@@ -62,6 +64,7 @@ class Step:
     confirmed_by_owner: bool = False
     hold: float = 0.0
     scroll_by: int = 0
+    keys: str | None = None     # action key: a shortcut such as "^s" or "{ENTER}" (desktop driver)
     zoom: float = 0.0           # 0 = no zoom; otherwise the scale (zoom: auto is 1.5)
     zoom_on: str | None = None  # what to zoom to (default: target, then highlight)
     zoom_set: bool = False      # the step sets zoom itself (an explicit zoom: false beats style.zoom)
@@ -121,6 +124,8 @@ class Storyboard:
     # no live system is recorded, so writes are allowed and no saved sign-in is needed.
     local_copy: bool = False
     navigation: str = "load"
+    driver: str = "browser"             # browser (Playwright) | desktop (any Windows app window)
+    app: dict[str, Any] = field(default_factory=dict)   # desktop: window (title regex), launch, size
     speed: float = 1.0
     viewport: tuple[int, int] = (1440, 900)
     poster: str = "intro"
@@ -369,6 +374,8 @@ def load(path: str | Path, variant: str | None = None) -> Storyboard:
             errors.append(f"{w}action: one of {sorted(ACTIONS)}")
         if action in ("click", "type", "wait_for", "hover") and not rs.get("target"):
             errors.append(f"{w}target: required for {action}")
+        if action == "key" and not rs.get("keys"):
+            errors.append(f"{w}keys: required for key (for example \"^s\" or \"{{ENTER}}\")")
         if action == "type" and rs.get("text") is None:
             errors.append(f"{w}text: required for type")
         cap = rs.get("caption") or {}
@@ -398,6 +405,7 @@ def load(path: str | Path, variant: str | None = None) -> Storyboard:
             confirmed_by_owner=bool(rs.get("confirmed_by_owner", False)),
             hold=float(rs.get("hold", 0.0)),
             scroll_by=int(rs.get("scroll_by", 0)),
+            keys=rs.get("keys"),
             zoom=_zoom(rs.get("zoom"), w, errors),
             zoom_on=rs.get("zoom_on"),
             zoom_set="zoom" in rs,
@@ -451,6 +459,8 @@ def load(path: str | Path, variant: str | None = None) -> Storyboard:
         seeded_test_data=bool(data.get("seeded_test_data", False)),
         local_copy=bool(data.get("local_copy", False)),
         navigation=data.get("navigation", "load"),
+        driver=str(data.get("driver") or "browser"),
+        app=dict(data.get("app") or {}),
         speed=float(data.get("speed", 1.0)),
         viewport=(int(vp[0]), int(vp[1])),
         poster=data.get("poster", "intro"),
@@ -490,7 +500,23 @@ def load(path: str | Path, variant: str | None = None) -> Storyboard:
         errors.append(f"outro.layout: one of {', '.join(OUTRO_LAYOUTS)} or auto")
     if sb.outro_layout == "cta" and not sb.outro_cta:
         errors.append("outro.layout cta: needs outro.cta (the link or command to show)")
-    if not sb.base_url or sb.base_url.startswith("TODO"):
+    if sb.driver not in ("browser", "desktop"):
+        errors.append("driver: browser or desktop")
+    if sb.driver == "desktop":
+        from .desktop import parse_selector, SelectorError
+        if not sb.app.get("window"):
+            errors.append("app.window: required for the desktop driver (a regular expression matching the window title)")
+        for st in steps:
+            for key in ("target", "highlight", "zoom_on", "wait_for"):
+                val = getattr(st, key)
+                if val:
+                    try:
+                        parse_selector(val)
+                    except SelectorError as e:
+                        errors.append(f"steps.{st.id}.{key}: {e}")
+            if st.action == "goto" or st.route:
+                errors.append(f"steps.{st.id}: routes are for the browser driver; open the screen with a click instead")
+    elif not sb.base_url or sb.base_url.startswith("TODO"):
         errors.append("base_url: required")
     if not sb.sources or any(str(s).startswith("TODO") for s in sb.sources):
         errors.append("sources: list where every claim comes from (no TODO)")
@@ -517,7 +543,7 @@ def load(path: str | Path, variant: str | None = None) -> Storyboard:
                       + textscan.find_contacts(text, where, sb.allowed_hosts)):
                 errors.append(f"public mode: {h.safe()}")
     elif sb.mode == "handover":
-        if not sb.auth and not local:
+        if not sb.auth and not local and sb.driver == "browser":
             errors.append("handover mode: auth is required (a session saved by `studio login <name>`)")
         if delivery.get("public"):
             errors.append("handover mode: delivery.public must be false")
@@ -533,6 +559,16 @@ def load(path: str | Path, variant: str | None = None) -> Storyboard:
                         f"handover mode: step {s.id} may write to the live system ({s.action} on {s.target!r}); "
                         "mark it live_write: true with confirmed_by_owner: true, or make it read-only"
                     )
+            if s.action == "key" and not s.live_write and RISKY_KEYS.search(s.keys or ""):
+                errors.append(
+                    f"handover mode: step {s.id} sends {s.keys!r}, which may save, delete or submit on the live "
+                    "system; mark it live_write: true with confirmed_by_owner: true, or use another key"
+                )
+        if sb.driver == "desktop" and not local and any(
+                str(s.target or "").startswith("at=") and s.action in ("click", "type") and not s.live_write
+                for s in sb.steps):
+            sb.warnings.append("handover mode: clicks by position (at=X,Y) cannot be checked for writes; "
+                               "make sure each one only changes the view")
 
     # -- copy rules (both modes) -------------------------------------------
     for where, text in sb.on_screen_texts():

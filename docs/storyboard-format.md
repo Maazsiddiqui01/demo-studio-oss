@@ -243,7 +243,7 @@ the pace of the video.
 | Key | Type | Default | What it does |
 |---|---|---|---|
 | `id` | string | required | Unique name of the step. Used for the narration file, `poster`, `cutdown.steps` and `cutdown.overrides`. |
-| `action` | string | required | One of `click`, `type`, `hover`, `wait_for`, `scroll`, `goto`, `pause`. |
+| `action` | string | required | One of `click`, `type`, `hover`, `wait_for`, `scroll`, `goto`, `pause`, and `key` for desktop apps. |
 | `caption.title` | string | required | Main line of the caption. |
 | `caption.sub` | string | empty | Smaller line under the title. `(sped up)` is added when `speed_up` is true. |
 | `caption.n` | integer | position of the step | The step number shown in the caption. If you set it, numbers must run 1, 2, 3 and so on in order. |
@@ -251,6 +251,7 @@ the pace of the video.
 | `route` | string | none | Path joined to `base_url`, or a full URL, opened before the step when it differs from the current page. |
 | `target` | selector | none | Playwright selector of the element to act on. Required for `click`, `type`, `hover`, `wait_for`. The first match is used. |
 | `text` | string | none | What to type. Required for `type`. Typed at 55 ms per key. |
+| `keys` | string | none | Desktop apps: the shortcut a `key` step sends, in pywinauto syntax (`^s`, `{ENTER}`, `^{PGDN}`). |
 | `wait_for` | selector | none | After the action, wait until this element is visible. |
 | `timeout` | seconds | 30 (120 with `speed_up`) | How long `wait_for` and `highlight` may wait for their element. |
 | `highlight` | selector | none | Draws the highlight ring on this element for the whole step. |
@@ -277,6 +278,7 @@ Unknown step keys are ignored, not reported.
 | `scroll` | With `target`: scrolls it to the middle of the window. Without: scrolls `scroll_by` pixels. |
 | `goto` | Does nothing itself. The step's `route` does the navigation. |
 | `pause` | Does nothing. Holds the step so the narration can play. Use it with `highlight` or `zoom`. |
+| `key` | Desktop apps only: sends `keys` to the app. |
 
 The page the recording starts on is the `route` of the first step that has one, or `/` when no
 step has a route. It loads before the intro slide appears.
@@ -288,6 +290,22 @@ selector). While it waits, a "Sped up 4x" badge shows in the corner, the caption
 "(sped up)", and that stretch of video plays `speed_factor` times faster. The narration still
 plays at normal speed, so write enough words to cover the sped-up stretch: the gate reports any
 silence over 3 s.
+
+## Desktop apps
+
+`driver: desktop` records a Windows app window instead of a web page. The steps, captions, zoom,
+voice and style work the same way; the differences are:
+
+| Key | What it does |
+|---|---|
+| `driver` | `browser` (the default) or `desktop`. |
+| `app.window` | Required for `desktop`: a regular expression matched against the window title. |
+| `app.launch` | A command that starts the app when no window matches. `app.launch_timeout` (90 s) is how long to wait for it. |
+| `app.maximize` | Maximize the window before recording. Or set `app.size: [w, h]` and `app.position: [x, y]`. |
+
+Selectors are `name=Save; type=Button` (keys `name`, `name_re`, `type`, `id`, `class`, `index`) or
+`at=X,Y` in window pixels. A desktop storyboard has no `base_url` and no `route`. Everything else,
+with examples, is in [desktop.md](desktop.md).
 
 ## Voices
 

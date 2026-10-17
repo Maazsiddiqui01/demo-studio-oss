@@ -34,6 +34,8 @@ gpu = ["kokoro>=0.9.4"]
 check = ["faster-whisper>=1.1"]
 # Private links on your own server (Caddy basic auth)
 server = ["bcrypt>=4"]
+# The desktop driver (record any Windows app window): Windows UI Automation
+desktop = ["pywinauto>=0.6.8; sys_platform == 'win32'"]
 dev = ["pytest>=8"]
 
 [project.urls]

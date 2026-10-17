@@ -1,6 +1,6 @@
 ---
 name: make-walkthrough
-description: "Make a narrated walkthrough video of a web app with the open-source demo-studio CLI, from a plain-English request: look at the app, write the script yourself, record the real browser with Playwright, add a local Kokoro voice, captions, zoom, subtitles and a framed look, check every frame, and hand over the MP4. Use when someone asks for a walkthrough, demo video, product video, LinkedIn or social clip, client handover video, onboarding or release-notes video, or a short proposal clip of an app, or asks to set up demo-studio."
+description: "Make a narrated walkthrough video of a web app or a Windows desktop app (Power BI Desktop, Excel, any window) with the open-source demo-studio CLI, from a plain-English request: look at the app, write the script yourself, record the real browser with Playwright or the app window with UI Automation, add a local Kokoro voice, captions, zoom, subtitles and a framed look, check every frame, and hand over the MP4. Use when someone asks for a walkthrough, demo video, product video, LinkedIn or social clip, client handover video, onboarding or release-notes video, or a short proposal clip of an app, or asks to set up demo-studio."
 ---
 
 # Make a walkthrough video with demo-studio
@@ -18,6 +18,8 @@ there is the same guide for other agents; `docs/storyboard-format.md` has every 
    macOS and Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`).
 2. `uv tool install git+https://github.com/Maazsiddiqui01/demo-studio-oss`
 3. `studio doctor --download` (Chromium headless shell and the Kokoro model, about 350 MB, once).
+4. For desktop apps (Windows only), install the `desktop` extra instead:
+   `uv tool install --force "demo-studio[desktop] @ git+https://github.com/Maazsiddiqui01/demo-studio-oss"`.
 
 No API key, account or paid service is involved.
 
@@ -111,6 +113,36 @@ own `voice` for a second narrator. Pick the look on purpose: a background
 that suits the app's colours (`studio backgrounds` shows all 21) or `auto`, `theme: kinetic` for
 light apps and brands, the `product` intro when the first screen is the best picture.
 `studio slides walkthroughs/my-app.yaml` renders every intro, outro and caption design over the app.
+
+## Desktop apps (Windows)
+
+For an app window instead of a web page (`docs/desktop.md` has the details):
+
+```yaml
+driver: desktop
+app: { window: "Sales.*Returns", maximize: true }   # a regex for the window title; launch: "app.exe" to start it
+steps:
+  - id: returns
+    action: click
+    target: "name=Returns; type=TabItem"   # or at=640,360 in window pixels where controls have no names
+    caption: { n: 1, title: "Returns", sub: "By product and store" }
+    narration: "The returns page breaks returns down by product and store."
+  - id: next
+    action: key
+    keys: "^{PGDN}"                        # pywinauto syntax: ^ Ctrl, % Alt, + Shift, {ENTER}
+    caption: { n: 2, title: "Next page", sub: "Ctrl and Page Down" }
+    narration: "Control and page down moves to the next page."
+```
+
+- `studio windows` lists windows; `studio inspect "<title>"` prints controls with selectors. Report
+  canvases (Power BI), charts and custom-drawn apps have no names: screenshot the window and use
+  `at=X,Y`.
+- The recording moves the real mouse and keyboard. Tell the person first and ask them not to touch
+  the machine; suggest Do Not Disturb. Notifications and other windows over the app are blurred
+  automatically. Never change their system settings.
+- Reset the app before each render (filters and sliders keep their state) and never save their
+  file. A `key` step that saves, deletes or submits counts as a write on a live system.
+- `studio render <file> --reassemble` encodes again from the kept recording without recording.
 
 ## 5. Render, review, hand over
 

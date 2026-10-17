@@ -1,12 +1,15 @@
 {
   "name": "demo-studio-oss",
   "description": "Narrated product-walkthrough videos from a storyboard: Playwright drives your app, a local voice reads the script.",
-  "owner": { "name": "Muhammad Maaz Siddiqui", "url": "https://github.com/Maazsiddiqui01" },
+  "owner": {
+    "name": "Muhammad Maaz Siddiqui",
+    "url": "https://github.com/Maazsiddiqui01"
+  },
   "plugins": [
     {
       "name": "demo-studio",
       "source": "./plugins/demo-studio",
-      "description": "Make a narrated walkthrough video of a web app with the demo-studio CLI"
+      "description": "Make a narrated walkthrough video of a web app or a Windows desktop app with the demo-studio CLI"
     }
   ]
 }

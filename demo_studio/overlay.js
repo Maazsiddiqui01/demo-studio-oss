@@ -313,6 +313,25 @@
       zs = null;
     },
     zoomed() { return zs ? zs.s : 1; },
+    // For the desktop driver, which draws the overlay as still images over a screen recording:
+    // a ring at a fixed box, a click pulse at a point, and no transitions.
+    ringBox(x, y, w, h, pad) {
+      ringEl = null; const p = pad == null ? 6 : pad, r = $("ring");
+      if (w == null) { r.classList.remove("on"); return; }
+      r.style.left = (x - p) + "px"; r.style.top = (y - p) + "px";
+      r.style.width = (w + p * 2) + "px"; r.style.height = (h + p * 2) + "px"; r.classList.add("on");
+    },
+    pulseAt(x, y, scale) {
+      const p = $("pulse");
+      if (x == null) { p.style.opacity = "0"; return; }
+      p.classList.remove("go"); p.style.left = x + "px"; p.style.top = y + "px";
+      p.style.opacity = String(Math.max(0, 1 - scale / 1.6)); p.style.transform = `scale(${scale})`;
+    },
+    still() {
+      const st = document.createElement("style");
+      st.textContent = "*{transition:none!important;animation:none!important}";
+      root.appendChild(st);
+    },
     masked() { return masked.splice(0); },  // what was masked since the last call
     collect() {
       // Secrets never leave the page: pattern matches are replaced before the text is returned.

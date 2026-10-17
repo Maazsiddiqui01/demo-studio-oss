@@ -2,9 +2,9 @@
 
 Storyboard in, narrated product-walkthrough video out.
 
-Ask your coding agent for a walkthrough video of your web app, and get the video file back. The agent writes the script, Playwright drives the real app, a local Kokoro voice reads it, and demo-studio adds captions, a cursor, zoom, subtitles and a framed look, then checks every frame. You do not record your screen, and there is no API key and no subscription.
+Ask your coding agent for a walkthrough video of your web app or a Windows desktop app, and get the video file back. The agent writes the script, Playwright (or Windows UI Automation, for a desktop app) drives the real app, a local Kokoro voice reads it, and demo-studio adds captions, a cursor, zoom, subtitles and a framed look, then checks every frame. You do not record your screen, and there is no API key and no subscription.
 
-![The intro slide of the showcase video: a framed window on a teal wallpaper and a burned-in subtitle](docs/assets/showcase.jpg)
+![The intro slide of the showcase video: "Walkthrough videos without recording" in a framed window on a teal wallpaper](docs/assets/showcase.jpg)
 
 The showcase video was made by demo-studio itself: [`examples/showcase/`](examples/showcase/).
 
@@ -27,7 +27,11 @@ Show signing up, creating the first project and the dashboard. Made-up data only
 Add subtitles and a square version for LinkedIn. Give me the video file.
 ```
 
-The agent looks at your app, writes the script, puts it through the [humanizer](https://github.com/blader/humanizer) so it does not read as machine-written, renders, reviews every frame and hands you `video.mp4`. More prompts to copy are in [docs/prompts.md](docs/prompts.md), along with everything you can change (look, voice, length, layouts, shape). The guide the agent follows is [AGENTS.md](AGENTS.md).
+The agent looks at your app, writes the script, puts it through the [humanizer](https://github.com/blader/humanizer) so it does not read as machine-written, renders, reviews every frame and hands you `video.mp4`.
+
+![A frame from the showcase: a real coding-agent session that read the guide, installed demo-studio, wrote the script, rendered, reviewed the frames and fixed two problems](docs/assets/showcase-agent.jpg)
+
+That is a real session, replayed in the showcase: the agent followed the two prompts above, wrote the script itself and fixed two problems it found in its own frame review. More prompts to copy are in [docs/prompts.md](docs/prompts.md), along with everything you can change (look, voice, length, layouts, shape). The guide the agent follows is [AGENTS.md](AGENTS.md).
 
 ## What people use it for
 
@@ -36,6 +40,17 @@ The agent looks at your app, writes the script, puts it through the [humanizer](
 - **Portfolio projects:** a short demo for every project you ship.
 - **Product demos:** launch posts, landing pages and proposal clips.
 - **Onboarding and release notes:** ask again when the app changes, and the video follows.
+
+## Desktop apps too
+
+Set `driver: desktop` and demo-studio records a Windows app window instead of a web page: Power BI Desktop, Excel, an internal tool. It drives the app through Windows UI Automation with the real mouse and keyboard, records the window, and adds the same captions, zoom, voice and frame. Notifications and other apps' windows that pop up over the recording are blurred. Install the `desktop` extra and see [docs/desktop.md](docs/desktop.md).
+
+```text
+Use demo-studio to make a 60 second tour of the Power BI report that is open on my screen.
+Show the sales page, filter by one product, then the what-if page. Public video, subtitles on.
+```
+
+## Built for client work
 
 It is built for client work. Passwords, keys and card numbers are masked in the page before any frame is captured. You sign in yourself, live systems stay read-only unless the owner confirms a change, and a client's video stays on your machine. Public videos are blocked if a client's name or contact details reach the screen.
 
@@ -68,7 +83,7 @@ out/tidy-tasks-tour/
 
 The other files in the folder are listed in [docs/how-it-works.md](docs/how-it-works.md).
 
-![A frame from the finished showcase video: the app in a rounded window on a wallpaper, with a numbered caption card, a cursor with a highlight ring and a subtitle](docs/assets/showcase-result.jpg)
+![A frame from the showcase: the result screen with video.mp4, captions.vtt and REPORT.md, and the agent's video playing](docs/assets/showcase-result.jpg)
 
 ## A storyboard
 
@@ -182,6 +197,7 @@ Extras, installed with the tool (for example `uv tool install "demo-studio[check
 | `[gpu]` | Kokoro on torch, which uses a CUDA GPU when there is one. Install torch for your CUDA first. |
 | `[check]` | faster-whisper, for the speech check in the quality gate. |
 | `[server]` | bcrypt, for private links on your own server. |
+| `[desktop]` | pywinauto, for recording Windows desktop apps ([docs/desktop.md](docs/desktop.md)). Windows only. |
 
 Environment variables:
 
@@ -201,6 +217,7 @@ How the stages work, and the known limits, are in [docs/how-it-works.md](docs/ho
 - demo-studio: MIT, see [LICENSE](LICENSE).
 - Voice: Kokoro-82M is Apache-2.0. The model is downloaded at first use from the kokoro-onnx release and is not shipped in this repository. kokoro-onnx, the runtime, is MIT. Do not use a non-commercial voice model with demo-studio.
 - Playwright: Apache-2.0. Chromium is downloaded by Playwright.
+- pywinauto (the `desktop` extra): BSD-3-Clause.
 - Fonts: Inter, Archivo, Mona Sans and JetBrains Mono, under SIL OFL 1.1. They are bundled in `demo_studio/templates/fonts` with their licence files.
 - ffmpeg: from your PATH, or from the `imageio-ffmpeg` wheel. It is LGPL or GPL, depending on the build, and demo-studio runs it as a separate program.
 - kokoro-onnx installs phonemizer and, through espeakng-loader, eSpeak NG. Both are GPL-3.0 licensed and neither is part of this repository.

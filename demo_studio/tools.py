@@ -27,17 +27,81 @@ def ffmpeg_exe() -> str:
         raise RuntimeError("ffmpeg not found: install it, or `pip install imageio-ffmpeg`") from e
 
 
+STALL_SECONDS = 180  # no encoding progress for this long means ffmpeg is stuck
+
+
 def ffmpeg(*args: str, cwd: Path | None = None) -> None:
-    cmd = [ffmpeg_exe(), "-hide_banner", "-loglevel", "error", "-y", *args]
-    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
-    if r.returncode != 0:
-        raise RuntimeError(f"ffmpeg failed: {' '.join(cmd)}\n{r.stderr[-2000:]}")
+    """Run ffmpeg and raise on failure. ffmpeg 7 and 8 can deadlock at the end of a long filter
+    graph when the machine is busy (every thread waiting, 0% CPU, forever), so the run is watched
+    through -progress; a stalled run is killed and tried once more with single-threaded filtering."""
+    base = [ffmpeg_exe(), "-hide_banner", "-nostdin", "-loglevel", "error", "-y"]
+    for extra in ([], ["-filter_complex_threads", "1"]):
+        cmd = base + extra + list(args)
+        rc, err = _run_watched(cmd, cwd)
+        if rc == 0:
+            return
+        if rc is not None:
+            raise RuntimeError(f"ffmpeg failed: {' '.join(cmd)}\n{err[-2000:]}")
+        if not extra:
+            print(f"  ffmpeg made no progress for {STALL_SECONDS}s and was stopped; trying again "
+                  "with single-threaded filtering", flush=True)
+    raise RuntimeError(f"ffmpeg made no progress for {STALL_SECONDS}s, twice: {' '.join(cmd)}")
+
+
+def _progress_mark(path: str) -> tuple:
+    """The newest out_time_us, total_size and progress values in an ffmpeg -progress file."""
+    try:
+        text = Path(path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ()
+    found = {}
+    for key in ("out_time_us", "total_size", "frame", "progress"):
+        i = text.rfind(key + "=")
+        if i >= 0:
+            found[key] = text[i:text.find("\n", i)]
+    return tuple(sorted(found.items()))
+
+
+def _run_watched(cmd: list[str], cwd: Path | None) -> tuple[int | None, str]:
+    """(returncode, stderr), or (None, stderr) when the run stalled and was killed. stdin is closed
+    (ffmpeg started from a background shell otherwise waits on it) and stderr goes to a file, so a
+    chatty run can never block on a full pipe."""
+    import tempfile
+    import time
+    fd, prog = tempfile.mkstemp(prefix="demo-studio-ffmpeg-", suffix=".progress")
+    os.close(fd)
+    try:
+        with tempfile.TemporaryFile() as err:
+            full = cmd[:1] + ["-progress", "file:" + prog, "-stats_period", "1"] + cmd[1:]
+            proc = subprocess.Popen(full, cwd=cwd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=err)
+            mark, t_mark = None, time.time()
+            while True:
+                try:
+                    rc = proc.wait(timeout=2)
+                    break
+                except subprocess.TimeoutExpired:
+                    pass
+                m = _progress_mark(prog)
+                if m != mark:
+                    mark, t_mark = m, time.time()
+                elif time.time() - t_mark > STALL_SECONDS:
+                    proc.kill()
+                    proc.wait()
+                    rc = None
+                    break
+            err.seek(0)
+            return rc, err.read().decode("utf-8", errors="replace")
+    finally:
+        try:
+            os.unlink(prog)
+        except OSError:
+            pass
 
 
 def ffmpeg_stderr(*args: str) -> str:
     """Run ffmpeg for its analysis output (volumedetect, silencedetect, -i)."""
-    r = subprocess.run([ffmpeg_exe(), "-hide_banner", *args], capture_output=True, text=True,
-                       encoding="utf-8", errors="replace")
+    r = subprocess.run([ffmpeg_exe(), "-hide_banner", "-nostdin", *args], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace", stdin=subprocess.DEVNULL)
     return r.stderr
 
 
@@ -59,7 +123,7 @@ def probe(path: Path) -> dict:
 
 
 def ffmpeg_version() -> str:
-    r = subprocess.run([ffmpeg_exe(), "-version"], capture_output=True, text=True)
+    r = subprocess.run([ffmpeg_exe(), "-version"], capture_output=True, text=True, stdin=subprocess.DEVNULL)
     return (r.stdout.splitlines() or ["?"])[0]
 
 

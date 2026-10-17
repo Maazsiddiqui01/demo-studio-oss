@@ -101,3 +101,20 @@ def test_local_copy_refuses_a_remote_url(tmp_path):
 def test_handover_write_still_needs_owner_yes_without_local_copy(tmp_path):
     e = errors(build(tmp_path, **HANDOVER_WRITE, auth="acme"))
     assert "may write to the live system" in e
+
+
+def test_figures_on_separate_lines_are_not_a_phone():
+    from demo_studio.textscan import find_contacts
+    assert not find_contacts("51510\n36190\n30772\n30320", "screen")
+    assert find_contacts("Call +1 415 555 0100 today", "screen")
+
+
+def test_desktop_handover_key_and_position_clicks(tmp_path):
+    steps = [{"id": "s", "action": "key", "keys": "^s", "caption": {"n": 1, "title": "Save"}, "narration": "Plain words."},
+             {"id": "c", "action": "click", "target": "at=10,10", "caption": {"n": 2, "title": "Tab"}, "narration": "Plain words."}]
+    over = dict(mode="handover", client="acme-client", banned_terms=[], base_url=None, driver="desktop",
+                app={"window": "Report"}, delivery={"public": False, "local_only": True})
+    assert "may save, delete or submit" in errors(build(tmp_path, steps=steps, **over))
+    steps[0]["keys"] = "^{PGDN}"
+    sb = load(build(tmp_path, steps=steps, **over))
+    assert any("at=X,Y" in w for w in sb.warnings)

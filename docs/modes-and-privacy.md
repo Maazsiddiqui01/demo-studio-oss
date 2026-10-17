@@ -156,6 +156,16 @@ review in the [quality gate](quality-gate.md) is the check for all of these.
 replaced by `[masked]`. Text hidden only by a selector is not removed from that file. Keep the
 output folder private, especially in handover mode.
 
+## Desktop apps
+
+The desktop driver ([desktop.md](desktop.md)) follows the same rules. Password fields and pattern
+matches are found through Windows UI Automation and blurred. While it records, any other app's
+window over the recorded area, such as a notification or a chat pop-up, is blurred for as long as
+it shows and listed in REPORT.md. In handover mode, a `key` step that may save, delete or submit
+needs `live_write: true` and `confirmed_by_owner: true`, and the validator warns that clicks by
+position cannot be checked. Turn on Do Not Disturb before a client recording, and never save the
+client's file during one.
+
 ## Delivery
 
 | Mode | Default | Optional |

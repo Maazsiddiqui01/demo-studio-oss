@@ -9,11 +9,12 @@
 | `studio validate <file> [--variant NAME]` | Checks a storyboard, and each of its variants unless you name one. |
 | `studio slides <file> [--variant NAME] [--out DIR]` | Writes stills of every intro layout, outro layout and caption style over your app, to pick a look before rendering. |
 | `studio backgrounds [--out FILE]` | Writes one image with every wallpaper preset, labelled by name and category. |
-| `studio render <file>` | Narrate, record, assemble, gate. Flags: `--variant NAME`, `--headed` (watch the browser), `--keep-frames`, `--no-cut`, `--cut-only`, `--no-speech`, `--cost "..."`. |
+| `studio render <file>` | Narrate, record, assemble, gate. Flags: `--variant NAME`, `--headed` (watch the browser), `--keep-frames`, `--no-cut`, `--cut-only`, `--no-speech`, `--reassemble` (encode again from a kept recording, without recording), `--cost "..."`. |
 | `studio check <out-dir>` | Runs the gate again. Records the frame review with `--frames pass --note "..."`. |
 | `studio login <name>` / `logout <name>` | Saves or deletes a sign-in session ([modes-and-privacy.md](modes-and-privacy.md)). |
 | `studio publish <out-dir>` | Sends the render to a folder or server ([publishing.md](publishing.md)). |
 | `studio serve <folder> [--port 5173]` | Previews a demo app, with client-side routes working. |
+| `studio windows` / `studio inspect <title>` | Desktop driver: lists the open windows, or one window's controls with a selector for each ([desktop.md](desktop.md)). |
 | `studio expire [--dry-run]` | Deletes expired private links (on the server). |
 
 ## The stages
@@ -31,6 +32,8 @@
    frames (quality 92) from Chromium's screencast with the browser's own timestamps. It also
    collects each screen's visible text for the gate.
    Makes `frames/`, `timeline.json`, `strings.json`, `masked.json`.
+   With `driver: desktop` this stage drives a Windows app through UI Automation instead, records
+   its part of the screen with ffmpeg, and draws the same overlays afterwards ([desktop.md](desktop.md)).
 4. **Assemble.** ffmpeg turns the frames, the narration, the optional music and the optional
    burned-in subtitles into the final files. The video is H.264 (x264, preset slow, CRF 18) at 30
    fps with AAC audio at 160 kbps, and the index is moved to the front so it plays while it
@@ -152,6 +155,9 @@ if the element would not fit.
 - **The recording is capped at the viewport size.** Screencast frames never exceed the viewport in
   CSS pixels, so a bigger canvas does not add detail. Place the recording at 1:1, or use
   `viewport: auto`, for sharp text. Scaling down softens it, and so does `fill`.
+- **ffmpeg can hang.** ffmpeg 7 and 8 sometimes deadlock at the end of a long filter graph when
+  the machine is busy. Every ffmpeg run is watched: one that makes no progress for 3 minutes is
+  stopped and tried once more with single-threaded filtering.
 - **Fixed browser settings.** Apps are recorded in Chromium with the light colour scheme and the
   `en-US` locale, at 1x scale, and the video is 30 fps.
 

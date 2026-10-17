@@ -176,8 +176,8 @@ def assemble(sb, timeline: dict, narr: dict, out: Path, keep_frames: bool = Fals
     if sb.style.frame:
         from .style import filter_graph, frame_assets
         frame = frame_assets(sb.style, sb.viewport, Path(sb.path).parent, name=sb.name, log=log)
-        for layer in ("wallpaper", "window", "mask"):
-            inputs += ["-loop", "1", "-framerate", str(FPS), "-i", frame[layer]]
+        for layer in ("wallpaper", "window", "mask"):  # looped stills, cut a second past the end
+            inputs += ["-loop", "1", "-framerate", str(FPS), "-t", f"{total + 1:.3f}", "-i", frame[layer]]
         vf = filter_graph(frame, FPS)
         w, h = frame["canvas"]
         log(f"  encoding {total:.1f}s at {w}x{h} (framed on {frame['background']}, recording at {frame['w']}x{frame['h']}), {FPS} fps")

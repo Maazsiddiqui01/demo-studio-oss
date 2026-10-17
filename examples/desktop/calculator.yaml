@@ -1,0 +1,58 @@
+# A desktop-app example: Windows Calculator, driven by the desktop driver (docs/desktop.md).
+#   pip install "demo-studio[desktop]"      (Windows only)
+#   studio render examples/desktop/calculator.yaml
+# It starts Calculator if it is not open, then moves the real mouse for about 30 seconds:
+# keep your hands off the machine until it finishes.
+version: 1
+name: desktop-calculator
+mode: public
+driver: desktop
+app: { window: "^Calculator$", launch: "calc.exe", size: [560, 690], position: [40, 20] }
+title: "A *desktop app* in thirty seconds"
+eyebrow: "DEMO STUDIO EXAMPLE"
+intro_note: "Windows Calculator, recorded by the desktop driver."
+intro: { narration: "This is Windows Calculator, recorded by demo studio.", layout: statement }
+outro:
+  heading: "Desktop apps *too*"
+  bullets: ["Real clicks in a Windows app", "Captions, zoom and voice added"]
+  narration: "Any app with a window works the same way."
+  layout: summary
+voice: male
+sources: ["Windows Calculator, built into Windows"]
+banned_terms: []
+style: { background: ocean, theme: petrol, subtitles: true, music: none }
+delivery: { public: false, private_link: false, expires: null, local_only: true }
+steps:
+  - id: clear
+    action: click
+    target: "name=Clear; type=Button"
+    caption: { n: 1, title: "Start from zero", sub: "Clear" }
+    narration: "First, clear the display."
+  - id: seven
+    action: click
+    target: "name=Seven; type=Button"
+    caption: { n: 2, title: "Type a number", sub: "Seven" }
+    narration: "Click seven."
+  - id: plus
+    action: click
+    target: "name=Plus; type=Button"
+    zoom: auto
+    caption: { n: 3, title: "Add", sub: "Plus" }
+    narration: "Then plus."
+  - id: five
+    action: click
+    target: "name=Five; type=Button"
+    caption: { n: 4, title: "Another number", sub: "Five" }
+    narration: "Then five."
+  - id: equals
+    action: key
+    keys: "{ENTER}"
+    caption: { n: 5, title: "Equals", sub: "The Enter key" }
+    narration: "Enter gives the answer."
+  - id: result
+    action: pause
+    highlight: "id=CalculatorResults"
+    zoom: 1.6
+    hold: 0.5
+    caption: { n: 6, title: "Twelve", sub: "On the display" }
+    narration: "The display shows twelve."
